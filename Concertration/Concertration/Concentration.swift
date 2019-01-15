@@ -38,12 +38,13 @@ struct Concentration
         
         set { // newValue parameter is omitted in method signature, but is accessible in func body
             for index in cards.indices {
-                cards[index].isFaceUp = (index == newValue) // nice!!!
+                cards[index].isFaceUp = index == newValue // nice!!!
             }
         }
     }
     
     func timeBonus(for seconds:Double) -> Int {
+        /// Тут точно switch заюзать надо
         if 0.0.isLess(than: seconds) && seconds.isLess(than: 1.0) {
             print("super fast!!! \(seconds)")
             return 3
@@ -57,7 +58,7 @@ struct Concentration
             return 1
         }
     }
-    
+    ///--- Слишком большая функция, надо разбить на несколько, читать ее - крайне сложно
     mutating func chooseCard(at index: Int) {     // added mutating when converted from class to struct, since struct is value type
 //        if cards[index].isFaceUp {
 //            cards[index].isFaceUp = false
@@ -71,6 +72,7 @@ struct Concentration
             flipCount += 1 // Assignment 1. Moving flipCount out of ViewController
         }
         
+        ///--- большая вложенность, надо править (много if-ов)
         if !cards[index].isMatched {
             print("if !cards[index].isMatched branch")
             if let matchIndex = indexOfOneAndOnlyFaceUpCard, matchIndex != index {
@@ -141,14 +143,15 @@ struct Concentration
 
 extension Collection {
     var oneAndOnly: Element? {
-        return count == 1 ? first : nil
+        return self.count == 1 ? first : nil
     }
 }
 
 extension MutableCollection {
     /// Shuffles the contents of this collection.
     mutating func shuffle() {
-        let c = count
+        /// всегда пишем полные нзвания переменных, не сокращаем имена, это повышает читаемость
+        let c = self.count
         guard c > 1 else { return }
         
         for (firstUnshuffled, unshuffledCount) in zip(indices, stride(from: c, to: 1, by: -1)) {
