@@ -34,9 +34,4 @@ struct Card: Hashable {
         Card.identifierFactory += 1
         return Card.identifierFactory
     }
-    
-//    init(identifier: Int) {
-//        self.identifier = identifier
-//    }
-    
 }
