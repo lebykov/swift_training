@@ -16,43 +16,37 @@ struct SetGame {
     var setOnTable = [Card]()
     
     init() {
-        for n in 1...81 {
-            deck.append(Card(number: n, symbol: n, shading: n, color: n))
+        for variant in self.cartsianProductForCardsProperties() {
+            self.deck.append(Card(number: variant[0], symbol: variant[1], shading: variant[2], color: variant[3]))
         }
-        
-        // TODO
-        // 1. shuffle deck
-        // 2. generate all permutations for 3 elements of size four
-        
+        self.deck.shuffle()
         for index in 0..<12 {
-            table.append(deck[index])
+            self.table.append(self.deck[index])
         }
-        deck.removeSubrange(0..<12)
+        self.deck.removeSubrange(0..<12)
         
-        print("created set game with \(deck.count) cards in the deck and \(table.count) cards on the table")
-
+        print("created set game with \(self.deck.count) cards in the deck and \(self.table.count) cards on the table")
     }
     
     mutating func chooseCard(at index: Int) {
         print("choosed card at index: \(index)")
         
-        if index >= table.count { return }
-        if matchedCards.contains(table[index]) { return }
+        if index >= self.table.count { return }
+        if self.matchedCards.contains(self.table[index]) { return }
         
-        let chosenCard = table[index]
+        let chosenCard = self.table[index]
         
-        if selectedCards.count < 3 {
-            if selectedCards.contains(chosenCard) {
-                selectedCards.remove(at: selectedCards.index(of: chosenCard)!)
+        if self.selectedCards.count < 3 {
+            if self.selectedCards.contains(chosenCard) {
+                self.selectedCards.remove(at: self.selectedCards.index(of: chosenCard)!)
             } else {
-                selectedCards.append(chosenCard)
+                self.selectedCards.append(chosenCard)
             }
-            
-            if selectedCards.count == 3 {
-                if checkForMatch() {
+            if self.selectedCards.count == 3 {
+                if self.checkForMatch() {
                     print("there is a match")
 //                    matchedCards += selectedCards
-                    setOnTable += selectedCards
+                    self.setOnTable += self.selectedCards
                 } else {
                     print("there is no match")
                 }
@@ -60,42 +54,31 @@ struct SetGame {
         } else {
             // choose card after evaluation
             // TODO check that there are cards left in the Deck
-            
-            if setOnTable.count == 3 {
+            if self.setOnTable.count == 3 {
                 // there is a match
-                matchedCards += selectedCards
-                replaceCardsInTheSet()
-                
-                selectedCards.removeAll()
-
-                if !setOnTable.contains(chosenCard) {
+                self.matchedCards += self.selectedCards
+                self.replaceCardsInTheSet()
+                self.selectedCards.removeAll()
+                if !self.setOnTable.contains(chosenCard) {
                     print("touched card is not in the set")
-                    
-                    selectedCards.append(chosenCard)
+                    self.selectedCards.append(chosenCard)
                 }
-                
-                setOnTable.removeAll()
-                
+                self.setOnTable.removeAll()
             } else {
                 // there is no match
-                selectedCards.removeAll()
-                selectedCards.append(chosenCard)
+                self.selectedCards.removeAll()
+                self.selectedCards.append(chosenCard)
             }
         }
     }
 
-    
     mutating func checkForMatch() -> Bool {
-
-        if selectedCards.count != 3 { return false }
-        
+        if self.selectedCards.count != 3 { return false }
         var thereIsAMatch = false
-        
         let equalNumbers = Set<Int>([selectedCards[0].number, selectedCards[1].number, selectedCards[2].number]).count
         let equalSymbols = Set<Int>([selectedCards[0].symbol, selectedCards[1].symbol, selectedCards[2].symbol]).count
         let equalShadings = Set<Int>([selectedCards[0].shading, selectedCards[1].shading, selectedCards[2].shading]).count
         let equalColors = Set<Int>([selectedCards[0].color, selectedCards[1].color, selectedCards[2].color]).count
-
         if equalNumbers == 3 && equalSymbols == 3 && equalShadings == 3 && equalColors == 3 {
             print("Match because no equal chars")
             thereIsAMatch = true
@@ -103,10 +86,11 @@ struct SetGame {
             print("Match because equal chars")
             thereIsAMatch = true
         }
+//        return thereIsAMatch
         
-        return thereIsAMatch
+        // For debug
+        return true
     }
-    
     
     mutating func replaceCardsInTheSet() {
         print("replaceSelectedCards was called")
@@ -119,7 +103,6 @@ struct SetGame {
         }
     }
     
-    
     mutating func addThreeCardsToTable() {
         print("addThreeCardsToTable was called")
         if deck.count > 2 && table.count < 22 {
@@ -131,7 +114,6 @@ struct SetGame {
         }
     }
     
-    
     mutating func deal3MoreCards() {
         // replace cards in the set
         if setOnTable.count == 3 {
@@ -141,5 +123,20 @@ struct SetGame {
         } else {
             addThreeCardsToTable()
         }
+    }
+    
+    func cartsianProductForCardsProperties() -> [[Int]]{
+        let numbersList = [1, 2, 3]
+        var productList: [[Int]] = []
+        for element1 in numbersList {
+            for element2 in numbersList {
+                for element3 in numbersList {
+                    for element4 in numbersList {
+                        productList.append([element1, element2, element3, element4])
+                    }
+                }
+            }
+        }
+        return productList
     }
 }

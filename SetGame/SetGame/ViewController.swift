@@ -11,7 +11,10 @@ import UIKit
 class ViewController: UIViewController {
     
     private lazy var game = SetGame()
-
+    
+    private var symbols = Array(101...181) // for development only
+    
+    private let cardSymbols = ["▲", "●", "■"]
 
     @IBOutlet var cardButtons: [UIButton]! {
         didSet {
@@ -20,10 +23,7 @@ class ViewController: UIViewController {
         }
     }
     
-    
     @IBOutlet weak var scoreLabel: UILabel!
-    
-    
     
     @IBAction func touchDeal3MoreCardsButton(_ sender: UIButton) {
         print("touched Deal button")
@@ -41,14 +41,12 @@ class ViewController: UIViewController {
         toggleDeal3MoreCardsButton()
     }
     
-    
     @IBOutlet weak var deal3MoreCardsButton: UIButton! {
         didSet {
             toggleDeal3MoreCardsButton()
         }
     }
     
-
     @IBAction func touchCardButton(_ sender: UIButton) {
         if let cardIndex = cardButtons.index(of: sender) {
             game.chooseCard(at: cardIndex)
@@ -68,7 +66,22 @@ class ViewController: UIViewController {
             if index < game.table.count {
 //                print("updating button with index \(index), setting Title to \(symbols[game.table[index].number - 1])")
 //                print("game.table[index].number: \(game.table[index].number)")
-                button.setTitle(String(symbols[game.table[index].number - 1]), for: UIControlState.normal)
+//                button.setTitle(String(symbols[game.table[index].number - 1]), for: .normal)
+                let cardOnTheTable = game.table[index]
+                print(">>> Card \(cardOnTheTable.number) for button \(cardButtons[index])")
+                
+                let buttonTitleAttributes: [NSAttributedString.Key: Any] = [
+                    .strokeWidth: cardOnTheTable.shading == 3 ? 8 : -1,
+                    .foregroundColor: self.getSymbolColorByPropertyValue(value: cardOnTheTable.color)
+                        .withAlphaComponent(cardOnTheTable.shading == 1 ? 0.2 : 1.0)
+                ]
+                let buttonTitle: NSAttributedString = NSAttributedString(
+                    string: String(repeating: self.cardSymbols[cardOnTheTable.symbol - 1], count: cardOnTheTable.number),
+                    attributes: buttonTitleAttributes
+                )
+                
+                button.setAttributedTitle(buttonTitle, for: .normal)
+                
                 button.backgroundColor = #colorLiteral(red: 0.7540688515, green: 0.7540867925, blue: 0.7540771365, alpha: 1)
                 if game.selectedCards.count != 3 {
                     if game.selectedCards.contains(game.table[index]) {
@@ -91,12 +104,27 @@ class ViewController: UIViewController {
                 
                 if game.deck.count == 0 && game.matchedCards.contains(game.table[index]) {
                     button.setTitle("", for: UIControlState.normal)
+                    button.setAttributedTitle(NSAttributedString(string: ""), for: .normal)
                     button.backgroundColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 0)
                 }
             } else {
                 button.setTitle("", for: UIControlState.normal)
+                button.setAttributedTitle(NSAttributedString(string: ""), for: .normal)
                 button.backgroundColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 0)
             }
+        }
+    }
+    
+    private func getSymbolColorByPropertyValue(value: Int) -> (UIColor) {
+        switch value {
+        case 1:
+            return UIColor.cyan
+        case 2:
+            return UIColor.magenta
+        case 3:
+            return UIColor.yellow
+        default:
+            return UIColor.red
         }
     }
     
@@ -124,9 +152,5 @@ class ViewController: UIViewController {
             deal3MoreCardsButton.setTitleColor(#colorLiteral(red: 0.501960814, green: 0.501960814, blue: 0.501960814, alpha: 1), for: UIControlState.normal)
         }
     }
-    
-    private var symbols = Array(101...181) // for development only
-    
-    
 }
 
