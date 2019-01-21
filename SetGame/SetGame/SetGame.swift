@@ -14,9 +14,10 @@ struct SetGame {
     var selectedCards = [Card]()
     var matchedCards = [Card]()
     var setOnTable = [Card]()
+    var score = 0
     
     init() {
-        for variant in self.cartsianProductForCardsProperties() {
+        for variant in self.cartesianProductForCardsProperties() {
             self.deck.append(Card(number: variant[0], symbol: variant[1], shading: variant[2], color: variant[3]))
         }
         self.deck.shuffle()
@@ -47,7 +48,9 @@ struct SetGame {
                     print("there is a match")
 //                    matchedCards += selectedCards
                     self.setOnTable += self.selectedCards
+                    self.score += 3
                 } else {
+                    self.score -= 5
                     print("there is no match")
                 }
             }
@@ -74,58 +77,57 @@ struct SetGame {
 
     mutating func checkForMatch() -> Bool {
         if self.selectedCards.count != 3 { return false }
+        let acceptableValues = [1, 3]
         var thereIsAMatch = false
-        let equalNumbers = Set<Int>([selectedCards[0].number, selectedCards[1].number, selectedCards[2].number]).count
-        let equalSymbols = Set<Int>([selectedCards[0].symbol, selectedCards[1].symbol, selectedCards[2].symbol]).count
-        let equalShadings = Set<Int>([selectedCards[0].shading, selectedCards[1].shading, selectedCards[2].shading]).count
-        let equalColors = Set<Int>([selectedCards[0].color, selectedCards[1].color, selectedCards[2].color]).count
-        if equalNumbers == 3 && equalSymbols == 3 && equalShadings == 3 && equalColors == 3 {
-            print("Match because no equal chars")
-            thereIsAMatch = true
-        } else if equalNumbers == 1 && equalSymbols == 1 && equalShadings == 1 && equalColors == 1 {
-            print("Match because equal chars")
+        let equalNumbers = Set<Int>(self.selectedCards.map { $0.number }).count
+        let equalSymbols = Set<Int>(self.selectedCards.map { $0.symbol }).count
+        let equalShadings = Set<Int>(self.selectedCards.map { $0.shading }).count
+        let equalColors = Set<Int>(self.selectedCards.map { $0.color }).count
+        
+        if acceptableValues.contains(equalNumbers) && acceptableValues.contains(equalSymbols) && acceptableValues.contains(equalShadings) && acceptableValues.contains(equalColors) {
+            print("checkForMatch(): Match")
             thereIsAMatch = true
         }
-//        return thereIsAMatch
+        return thereIsAMatch
         
         // For debug
-        return true
+//        return true
     }
     
     mutating func replaceCardsInTheSet() {
         print("replaceSelectedCards was called")
-        if deck.count > 2 && setOnTable.count == 3 {
-            for card in setOnTable {
-                table[table.index(of: card)!] = deck.remove(at: 0)
+        if self.deck.count > 2 && self.setOnTable.count == 3 {
+            for card in self.setOnTable {
+                self.table[self.table.index(of: card)!] = self.deck.remove(at: 0)
             }
         } else {
-            print("replaceSelectedCards() error in conditions: deck.count = \(deck.count), setOnTable.count = \(setOnTable.count)")
+            print("replaceSelectedCards() error in conditions: deck.count = \(self.deck.count), setOnTable.count = \(self.setOnTable.count)")
         }
     }
     
     mutating func addThreeCardsToTable() {
         print("addThreeCardsToTable was called")
-        if deck.count > 2 && table.count < 22 {
+        if self.deck.count > 2 && self.table.count < 22 {
             for _ in 0..<3 {
-                table.append(deck.remove(at: 0))
+                self.table.append(self.deck.remove(at: 0))
             }
         } else {
-            print("addTreeCardsToTable() error in conditions: deck.count = \(deck.count), table.count = \(table.count)")
+            print("addTreeCardsToTable() error in conditions: deck.count = \(self.deck.count), table.count = \(self.table.count)")
         }
     }
     
     mutating func deal3MoreCards() {
         // replace cards in the set
-        if setOnTable.count == 3 {
-            replaceCardsInTheSet()
-            selectedCards.removeAll()
-            setOnTable.removeAll()
+        if self.setOnTable.count == 3 {
+            self.replaceCardsInTheSet()
+            self.selectedCards.removeAll()
+            self.setOnTable.removeAll()
         } else {
-            addThreeCardsToTable()
+            self.addThreeCardsToTable()
         }
     }
     
-    func cartsianProductForCardsProperties() -> [[Int]]{
+    func cartesianProductForCardsProperties() -> [[Int]]{
         let numbersList = [1, 2, 3]
         var productList: [[Int]] = []
         for element1 in numbersList {
