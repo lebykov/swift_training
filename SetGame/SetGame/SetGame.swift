@@ -8,6 +8,7 @@
 
 import Foundation
 
+///---- Название класса станное
 struct SetGame {
     var deck = [Card]()
     var table = [Card]()
@@ -21,14 +22,17 @@ struct SetGame {
             self.deck.append(Card(number: variant[0], symbol: variant[1], shading: variant[2], color: variant[3]))
         }
         self.deck.shuffle()
-        for index in 0..<12 {
+        ///----избегаем дублирования
+        let i = 12
+        for index in 0..<i {
             self.table.append(self.deck[index])
         }
-        self.deck.removeSubrange(0..<12)
+        self.deck.removeSubrange(0..<i)
         
         print("created set game with \(self.deck.count) cards in the deck and \(self.table.count) cards on the table")
     }
     
+    ///---- метод большой, многа букаф читать сложна непанятна!
     mutating func chooseCard(at index: Int) {
         print("choosed card at index: \(index)")
         
@@ -46,9 +50,9 @@ struct SetGame {
             if self.selectedCards.count == 3 {
                 if self.checkForMatch() {
                     print("there is a match")
-//                    matchedCards += selectedCards
+//                    matchedCards += selectedCards  надо?
                     self.setOnTable += self.selectedCards
-                    self.score += 3
+                    self.score += 3 // эта тройка как-то сввязано с тройкой сверху ? непонятно, потому что не используем константы
                 } else {
                     self.score -= 5
                     print("there is no match")
@@ -78,17 +82,18 @@ struct SetGame {
     mutating func checkForMatch() -> Bool {
         if self.selectedCards.count != 3 { return false }
         let acceptableValues = [1, 3]
-        var thereIsAMatch = false
+        /// булевые переменные стараемся называть на is... (isEnabled isLocked и тд)
+        var isMatch = false
         let equalNumbers = Set<Int>(self.selectedCards.map { $0.number }).count
         let equalSymbols = Set<Int>(self.selectedCards.map { $0.symbol }).count
         let equalShadings = Set<Int>(self.selectedCards.map { $0.shading }).count
         let equalColors = Set<Int>(self.selectedCards.map { $0.color }).count
         
-        if acceptableValues.contains(equalNumbers) && acceptableValues.contains(equalSymbols) && acceptableValues.contains(equalShadings) && acceptableValues.contains(equalColors) {
-            print("checkForMatch(): Match")
-            thereIsAMatch = true
-        }
-        return thereIsAMatch
+        isMatch = acceptableValues.contains(equalNumbers)
+            && acceptableValues.contains(equalSymbols)
+            && acceptableValues.contains(equalShadings)
+            && acceptableValues.contains(equalColors)
+        return isMatch
         
         // For debug
 //        return true
@@ -130,6 +135,9 @@ struct SetGame {
     func cartesianProductForCardsProperties() -> [[Int]]{
         let numbersList = [1, 2, 3]
         var productList: [[Int]] = []
+        ///---Жесть)
+        /// Похоже простого решения нет - https://stackoverflow.com/questions/43331168/swift-lazy-cartesian-product
+        /// https://github.com/Oyvindkg/SwiftProductGenerator
         for element1 in numbersList {
             for element2 in numbersList {
                 for element3 in numbersList {

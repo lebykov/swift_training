@@ -37,9 +37,7 @@ class ViewController: UIViewController {
     }
     
     @IBOutlet weak var deal3MoreCardsButton: UIButton! {
-        didSet {
-            self.toggleDeal3MoreCardsButton()
-        }
+        didSet { self.toggleDeal3MoreCardsButton() }
     }
     
     @IBAction func touchCardButton(_ sender: UIButton) {
@@ -53,6 +51,7 @@ class ViewController: UIViewController {
         print("touched card")
     }
     
+    /// Разбить на функции
     private func updateViewFromModel() {
         
         for index in self.cardButtons.indices {
