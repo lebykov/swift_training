@@ -53,55 +53,16 @@ class ViewController: UIViewController {
     
     /// Разбить на функции
     private func updateViewFromModel() {
-        
         for index in self.cardButtons.indices {
             let button = self.cardButtons[index]
-            
+            self.hideCardButton(button: button)
             if index < self.game.table.count {
                 let cardOnTheTable = self.game.table[index]
-                print(">>> Card \(cardOnTheTable.number) for button \(self.cardButtons[index])")
-                
-                let buttonTitleAttributes: [NSAttributedString.Key: Any] = [
-                    .strokeWidth: cardOnTheTable.shading == 3 ? 8 : -1,
-                    .foregroundColor: self.getSymbolColorByPropertyValue(value: cardOnTheTable.color)
-                        .withAlphaComponent(cardOnTheTable.shading == 1 ? 0.25 : 1.0)
-                ]
-                let buttonTitle: NSAttributedString = NSAttributedString(
-                    string: String(repeating: self.cardSymbols[cardOnTheTable.symbol - 1], count: cardOnTheTable.number),
-                    attributes: buttonTitleAttributes
-                )
-                
-                button.setAttributedTitle(buttonTitle, for: .normal)
-                button.backgroundColor = #colorLiteral(red: 0.7540688515, green: 0.7540867925, blue: 0.7540771365, alpha: 1)
-                
-                if self.game.selectedCards.count != 3 {
-                    if self.game.selectedCards.contains(game.table[index]) {
-                        button.layer.borderWidth = 3.0
-                        button.layer.borderColor = #colorLiteral(red: 0.2392156869, green: 0.6745098233, blue: 0.9686274529, alpha: 1)
-                    } else {
-                        button.layer.borderWidth = 0
-                    }
-                } else if self.game.selectedCards.count == 3 {
-                    if self.game.setOnTable.contains(self.game.table[index]) {
-                        button.layer.borderWidth = 3.0
-                        button.layer.borderColor = #colorLiteral(red: 0.4666666687, green: 0.7647058964, blue: 0.2666666806, alpha: 1)
-                    } else if self.game.selectedCards.contains(self.game.table[index]) {
-                        button.layer.borderWidth = 3.0
-                        button.layer.borderColor = #colorLiteral(red: 1, green: 0.1491314173, blue: 0, alpha: 1)
-                    } else {
-                        button.layer.borderWidth = 0
-                    }
+                self.applyCardSymbolsForButton(card: cardOnTheTable, button: button)
+                self.drawBorderAroundCardButton(card: cardOnTheTable, button: button)
+                if self.game.deck.count == 0 && self.game.matchedCards.contains(cardOnTheTable) {
+                    self.hideCardButton(button: button)
                 }
-                
-                if self.game.deck.count == 0 && self.game.matchedCards.contains(self.game.table[index]) {
-                    button.setTitle("", for: .normal)
-                    button.setAttributedTitle(NSAttributedString(string: ""), for: .normal)
-                    button.backgroundColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 0)
-                }
-            } else {
-                button.setTitle("", for: .normal)
-                button.setAttributedTitle(NSAttributedString(string: ""), for: .normal)
-                button.backgroundColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 0)
             }
         }
     }
@@ -145,6 +106,48 @@ class ViewController: UIViewController {
             print("deck.count < 3")
             self.deal3MoreCardsButton.isEnabled = false
             self.deal3MoreCardsButton.setTitleColor(#colorLiteral(red: 0.501960814, green: 0.501960814, blue: 0.501960814, alpha: 1), for: .normal)
+        }
+    }
+    
+    private func applyCardSymbolsForButton(card: Card, button: UIButton) {
+        let buttonTitleAttributes: [NSAttributedString.Key: Any] = [
+            .strokeWidth: card.shading == 3 ? 8 : -1,
+            .foregroundColor: self.getSymbolColorByPropertyValue(value: card.color)
+                .withAlphaComponent(card.shading == 1 ? 0.25 : 1.0)
+        ]
+        let buttonTitle: NSAttributedString = NSAttributedString(
+            string: String(repeating: self.cardSymbols[card.symbol - 1], count: card.number),
+            attributes: buttonTitleAttributes
+        )
+        
+        button.setAttributedTitle(buttonTitle, for: .normal)
+        button.backgroundColor = #colorLiteral(red: 0.7540688515, green: 0.7540867925, blue: 0.7540771365, alpha: 1)
+    }
+    
+    private func hideCardButton(button: UIButton) {
+        button.setTitle("", for: .normal)
+        button.setAttributedTitle(NSAttributedString(string: ""), for: .normal)
+        button.backgroundColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 0)
+    }
+    
+    private func drawBorderAroundCardButton(card: Card, button: UIButton) {
+        if self.game.selectedCards.count != 3 {
+            if self.game.selectedCards.contains(card) {
+                button.layer.borderWidth = 3.0
+                button.layer.borderColor = #colorLiteral(red: 0.2392156869, green: 0.6745098233, blue: 0.9686274529, alpha: 1)
+            } else {
+                button.layer.borderWidth = 0
+            }
+        } else if self.game.selectedCards.count == 3 {
+            if self.game.setOnTable.contains(card) {
+                button.layer.borderWidth = 3.0
+                button.layer.borderColor = #colorLiteral(red: 0.4666666687, green: 0.7647058964, blue: 0.2666666806, alpha: 1)
+            } else if self.game.selectedCards.contains(card) {
+                button.layer.borderWidth = 3.0
+                button.layer.borderColor = #colorLiteral(red: 1, green: 0.1491314173, blue: 0, alpha: 1)
+            } else {
+                button.layer.borderWidth = 0
+            }
         }
     }
 }

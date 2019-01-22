@@ -17,17 +17,24 @@ struct SetGame {
     var setOnTable = [Card]()
     var score = 0
     
+    ///----избегаем дублирования
+    // константы
+    let numberOfCardsOnTheTable = 12
+    let maxNumberOfSelectedCards = 3
+    let scorePoints = 3
+    let penaltyPoints = 5
+    let numberOfCardsInTheSet = 3
+    
     init() {
         for variant in self.cartesianProductForCardsProperties() {
             self.deck.append(Card(number: variant[0], symbol: variant[1], shading: variant[2], color: variant[3]))
         }
         self.deck.shuffle()
-        ///----избегаем дублирования
-        let i = 12
-        for index in 0..<i {
+        
+        for index in 0..<self.numberOfCardsOnTheTable {
             self.table.append(self.deck[index])
         }
-        self.deck.removeSubrange(0..<i)
+        self.deck.removeSubrange(0..<self.numberOfCardsOnTheTable)
         
         print("created set game with \(self.deck.count) cards in the deck and \(self.table.count) cards on the table")
     }
@@ -41,27 +48,27 @@ struct SetGame {
         
         let chosenCard = self.table[index]
         
-        if self.selectedCards.count < 3 {
+        if self.selectedCards.count < self.maxNumberOfSelectedCards {
             if self.selectedCards.contains(chosenCard) {
                 self.selectedCards.remove(at: self.selectedCards.index(of: chosenCard)!)
             } else {
                 self.selectedCards.append(chosenCard)
             }
-            if self.selectedCards.count == 3 {
+            if self.selectedCards.count == self.maxNumberOfSelectedCards {
                 if self.checkForMatch() {
                     print("there is a match")
 //                    matchedCards += selectedCards  надо?
                     self.setOnTable += self.selectedCards
-                    self.score += 3 // эта тройка как-то сввязано с тройкой сверху ? непонятно, потому что не используем константы
+                    self.score += self.scorePoints // эта тройка как-то сввязано с тройкой сверху ? непонятно, потому что не используем константы
                 } else {
-                    self.score -= 5
+                    self.score -= self.penaltyPoints
                     print("there is no match")
                 }
             }
         } else {
             // choose card after evaluation
             // TODO check that there are cards left in the Deck
-            if self.setOnTable.count == 3 {
+            if self.setOnTable.count == self.maxNumberOfSelectedCards {
                 // there is a match
                 self.matchedCards += self.selectedCards
                 self.replaceCardsInTheSet()
@@ -80,7 +87,7 @@ struct SetGame {
     }
 
     mutating func checkForMatch() -> Bool {
-        if self.selectedCards.count != 3 { return false }
+        if self.selectedCards.count != self.maxNumberOfSelectedCards { return false }
         let acceptableValues = [1, 3]
         /// булевые переменные стараемся называть на is... (isEnabled isLocked и тд)
         var isMatch = false
@@ -101,7 +108,7 @@ struct SetGame {
     
     mutating func replaceCardsInTheSet() {
         print("replaceSelectedCards was called")
-        if self.deck.count > 2 && self.setOnTable.count == 3 {
+        if self.deck.count > 2 && self.setOnTable.count == self.numberOfCardsInTheSet {
             for card in self.setOnTable {
                 self.table[self.table.index(of: card)!] = self.deck.remove(at: 0)
             }
@@ -123,7 +130,7 @@ struct SetGame {
     
     mutating func deal3MoreCards() {
         // replace cards in the set
-        if self.setOnTable.count == 3 {
+        if self.setOnTable.count == self.numberOfCardsInTheSet {
             self.replaceCardsInTheSet()
             self.selectedCards.removeAll()
             self.setOnTable.removeAll()
