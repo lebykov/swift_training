@@ -14,7 +14,7 @@ class ViewController: UIViewController {
     private let cardSymbols = ["▲", "●", "■"]
 
     @IBOutlet var cardButtons: [UIButton]! {
-        didSet { self.updateViewFromModel() }
+        didSet { self.updateView(from: self.game) }
     }
     
     @IBOutlet private weak var scoreLabel: UILabel! {
@@ -24,43 +24,38 @@ class ViewController: UIViewController {
     @IBAction func touchDeal3MoreCardsButton(_ sender: UIButton) {
         print("touched Deal button")
         self.game.deal3MoreCards()
-        self.updateViewFromModel()
-        self.toggleDeal3MoreCardsButton()
+        self.updateView(from: self.game)
     }
     
     @IBAction func touchStartNewGameButton(_ sender: UIButton) {
         print("touched New Game button")
         self.game = SetGame()
-        self.updateViewFromModel()
-        self.toggleDeal3MoreCardsButton()
-        self.updateScoreLabel(to: self.game.score)
+        self.updateView(from: self.game)
     }
     
     @IBOutlet weak var deal3MoreCardsButton: UIButton! {
-        didSet { self.toggleDeal3MoreCardsButton() }
+        didSet { self.toggleDeal3MoreCardsButton(from: self.game) }
     }
     
     @IBAction func touchCardButton(_ sender: UIButton) {
         if let cardIndex = cardButtons.index(of: sender) {
             self.game.chooseCard(at: cardIndex)
-            self.updateViewFromModel()
-            self.toggleDeal3MoreCardsButton()
-            self.updateScoreLabel(to: self.game.score)
+            self.updateView(from: self.game)
         }
-        
-        print("touched card")
     }
     
     /// Разбить на функции
-    private func updateViewFromModel() {
+    private func updateView(from model: SetGame) {
+        self.toggleDeal3MoreCardsButton(from: model)
+        self.updateScoreLabel(to: model.score)
         for index in self.cardButtons.indices {
             let button = self.cardButtons[index]
             self.hideCardButton(button: button)
-            if index < self.game.table.count {
-                let cardOnTheTable = self.game.table[index]
+            if index < model.table.count {
+                let cardOnTheTable = model.table[index]
                 self.applyCardSymbolsForButton(card: cardOnTheTable, button: button)
                 self.drawBorderAroundCardButton(card: cardOnTheTable, button: button)
-                if self.game.deck.count == 0 && self.game.matchedCards.contains(cardOnTheTable) {
+                if model.deck.count == 0 && model.matchedCards.contains(cardOnTheTable) {
                     self.hideCardButton(button: button)
                 }
             }
@@ -81,10 +76,12 @@ class ViewController: UIViewController {
     }
     
     private func updateScoreLabel(to newScore: Int) {
-        self.scoreLabel.text = "Score: \(newScore)"
+        if let scoreLabel = self.scoreLabel {
+            scoreLabel.text = "Score: \(newScore)"
+        }
     }
     
-    private func toggleDeal3MoreCardsButton() {
+    private func toggleDeal3MoreCardsButton(from model: SetGame) {
         // Turn on/off Deal3MoreCardsButton
         // Active
         // 1. Less then 24 cards on the table
@@ -92,20 +89,14 @@ class ViewController: UIViewController {
         // Disabled
         // 1. 24 cards on the table
         // 2. 24 cards and three chosen cards are not a set
-        if self.game.deck.count > 2 {
-            if self.game.table.count < 22 || game.setOnTable.count == 3 {
-                print("else")
-                self.deal3MoreCardsButton.isEnabled = true
-                self.deal3MoreCardsButton.setTitleColor(#colorLiteral(red: 0, green: 0.9768045545, blue: 0, alpha: 1), for: .normal)
+        if let deal3MoreCardsButton = self.deal3MoreCardsButton {
+            if model.deck.count > 2 && (model.table.count < 22 || model.setOnTable.count == 3) {
+                deal3MoreCardsButton.isEnabled = true
+                deal3MoreCardsButton.setTitleColor(#colorLiteral(red: 0, green: 0.9768045545, blue: 0, alpha: 1), for: .normal)
             } else {
-                print("deck.count < 3")
-                self.deal3MoreCardsButton.isEnabled = false
-                self.deal3MoreCardsButton.setTitleColor(#colorLiteral(red: 0.501960814, green: 0.501960814, blue: 0.501960814, alpha: 1), for: .normal)
+                deal3MoreCardsButton.isEnabled = false
+                deal3MoreCardsButton.setTitleColor(#colorLiteral(red: 0.501960814, green: 0.501960814, blue: 0.501960814, alpha: 1), for: .normal)
             }
-        } else {
-            print("deck.count < 3")
-            self.deal3MoreCardsButton.isEnabled = false
-            self.deal3MoreCardsButton.setTitleColor(#colorLiteral(red: 0.501960814, green: 0.501960814, blue: 0.501960814, alpha: 1), for: .normal)
         }
     }
     
@@ -128,27 +119,24 @@ class ViewController: UIViewController {
         button.setTitle("", for: .normal)
         button.setAttributedTitle(NSAttributedString(string: ""), for: .normal)
         button.backgroundColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 0)
+        button.layer.borderWidth = 0
     }
     
-    private func drawBorderAroundCardButton(card: Card, button: UIButton) {
-        if self.game.selectedCards.count != 3 {
-            if self.game.selectedCards.contains(card) {
-                button.layer.borderWidth = 3.0
-                button.layer.borderColor = #colorLiteral(red: 0.2392156869, green: 0.6745098233, blue: 0.9686274529, alpha: 1)
-            } else {
-                button.layer.borderWidth = 0
-            }
-        } else if self.game.selectedCards.count == 3 {
+    private func drawBorderAroundCardButton(card: Card, button: UIButton) {        
+        button.layer.borderWidth = 0
+        if self.game.isMaxNumerOfCardsSelected() {
             if self.game.setOnTable.contains(card) {
                 button.layer.borderWidth = 3.0
                 button.layer.borderColor = #colorLiteral(red: 0.4666666687, green: 0.7647058964, blue: 0.2666666806, alpha: 1)
             } else if self.game.selectedCards.contains(card) {
                 button.layer.borderWidth = 3.0
                 button.layer.borderColor = #colorLiteral(red: 1, green: 0.1491314173, blue: 0, alpha: 1)
-            } else {
-                button.layer.borderWidth = 0
+            }
+        } else {
+            if self.game.selectedCards.contains(card) {
+                button.layer.borderWidth = 3.0
+                button.layer.borderColor = #colorLiteral(red: 0.2392156869, green: 0.6745098233, blue: 0.9686274529, alpha: 1)
             }
         }
     }
 }
-

@@ -35,8 +35,10 @@ struct SetGame {
             self.table.append(self.deck[index])
         }
         self.deck.removeSubrange(0..<self.numberOfCardsOnTheTable)
-        
-        print("created set game with \(self.deck.count) cards in the deck and \(self.table.count) cards on the table")
+    }
+    
+    func isMaxNumerOfCardsSelected() -> (Bool) {
+        return self.selectedCards.count == self.maxNumberOfSelectedCards
     }
     
     ///---- метод большой, многа букаф читать сложна непанятна!
@@ -54,15 +56,12 @@ struct SetGame {
             } else {
                 self.selectedCards.append(chosenCard)
             }
-            if self.selectedCards.count == self.maxNumberOfSelectedCards {
+            if self.isMaxNumerOfCardsSelected() {
                 if self.checkForMatch() {
-                    print("there is a match")
-//                    matchedCards += selectedCards  надо?
                     self.setOnTable += self.selectedCards
                     self.score += self.scorePoints // эта тройка как-то сввязано с тройкой сверху ? непонятно, потому что не используем константы
                 } else {
                     self.score -= self.penaltyPoints
-                    print("there is no match")
                 }
             }
         } else {
@@ -74,7 +73,6 @@ struct SetGame {
                 self.replaceCardsInTheSet()
                 self.selectedCards.removeAll()
                 if !self.setOnTable.contains(chosenCard) {
-                    print("touched card is not in the set")
                     self.selectedCards.append(chosenCard)
                 }
                 self.setOnTable.removeAll()
@@ -101,30 +99,21 @@ struct SetGame {
             && acceptableValues.contains(equalShadings)
             && acceptableValues.contains(equalColors)
         return isMatch
-        
-        // For debug
-//        return true
     }
     
     mutating func replaceCardsInTheSet() {
-        print("replaceSelectedCards was called")
         if self.deck.count > 2 && self.setOnTable.count == self.numberOfCardsInTheSet {
             for card in self.setOnTable {
                 self.table[self.table.index(of: card)!] = self.deck.remove(at: 0)
             }
-        } else {
-            print("replaceSelectedCards() error in conditions: deck.count = \(self.deck.count), setOnTable.count = \(self.setOnTable.count)")
         }
     }
     
     mutating func addThreeCardsToTable() {
-        print("addThreeCardsToTable was called")
         if self.deck.count > 2 && self.table.count < 22 {
             for _ in 0..<3 {
                 self.table.append(self.deck.remove(at: 0))
             }
-        } else {
-            print("addTreeCardsToTable() error in conditions: deck.count = \(self.deck.count), table.count = \(self.table.count)")
         }
     }
     
