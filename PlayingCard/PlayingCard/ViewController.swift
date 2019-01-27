@@ -16,6 +16,9 @@ class ViewController: UIViewController {
         
         var deck = PlayingCardDeck()
         
+        for card in deck.cards {
+            print(card)
+        }
     }
 
 
