@@ -47,19 +47,20 @@ class ViewController: UIViewController {
     /// Разбить на функции
     private func updateView(from model: SetGame) {
         self.toggleDeal3MoreCardsButton(from: model)
-        self.updateScoreLabel(to: model.score)
-        for index in self.cardButtons.indices {
-            let button = self.cardButtons[index]
-            self.hideCardButton(button: button)
-            if index < model.table.count {
-                let cardOnTheTable = model.table[index]
-                self.applyCardSymbolsForButton(card: cardOnTheTable, button: button)
-                self.drawBorderAroundCardButton(card: cardOnTheTable, button: button)
-                if model.deck.count == 0 && model.matchedCards.contains(cardOnTheTable) {
-                    self.hideCardButton(button: button)
-                }
-            }
-        }
+        self.updateScoreLabel(with: model.score)
+		/// Кусок ниже тоже бы в отдельную функцию
+			for index in self.cardButtons.indices {
+				let button = self.cardButtons[index] /// про проверку границ надеюсь помнишь!
+				self.hideCardButton(button: button)
+				if index < model.table.count {
+					let cardOnTheTable = model.table[index]
+					self.applyCardSymbolsForButton(card: cardOnTheTable, button: button)
+					self.drawBorderAroundCardButton(card: cardOnTheTable, button: button)
+					if model.deck.count == 0 && model.matchedCards.contains(cardOnTheTable) {
+						self.hideCardButton(button: button)
+					}
+				}
+			}
     }
     
     private func getSymbolColorByPropertyValue(value: Int) -> (UIColor) {
@@ -75,7 +76,7 @@ class ViewController: UIViewController {
         }
     }
     
-    private func updateScoreLabel(to newScore: Int) {
+    private func updateScoreLabel(with newScore: Int) {
         if let scoreLabel = self.scoreLabel {
             scoreLabel.text = "Score: \(newScore)"
         }

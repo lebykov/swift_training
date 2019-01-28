@@ -10,6 +10,7 @@ import Foundation
 
 ///---- Название класса станное
 struct SetGame {
+	
     var deck = [Card]()
     var table = [Card]()
     var selectedCards = [Card]()
@@ -18,23 +19,27 @@ struct SetGame {
     var score = 0
     
     ///----избегаем дублирования
+	///--- артикли в нейминге не используем
     // константы
-    let numberOfCardsOnTheTable = 12
+    let numberOfCardsOnTable = 12
     let maxNumberOfSelectedCards = 3
     let scorePoints = 3
     let penaltyPoints = 5
-    let numberOfCardsInTheSet = 3
+    let numberOfCardsInSet = 3
     
     init() {
         for variant in self.cartesianProductForCardsProperties() {
-            self.deck.append(Card(number: variant[0], symbol: variant[1], shading: variant[2], color: variant[3]))
+            self.deck.append(Card(number: variant[0],
+								  symbol: variant[1],
+								  shading: variant[2],
+								  color: variant[3]))
         }
         self.deck.shuffle()
         
-        for index in 0..<self.numberOfCardsOnTheTable {
+        for index in 0..<self.numberOfCardsOnTable {
             self.table.append(self.deck[index])
         }
-        self.deck.removeSubrange(0..<self.numberOfCardsOnTheTable)
+        self.deck.removeSubrange(0..<self.numberOfCardsOnTable)
     }
     
     func isMaxNumerOfCardsSelected() -> (Bool) {
@@ -42,6 +47,7 @@ struct SetGame {
     }
     
     ///---- метод большой, многа букаф читать сложна непанятна!
+	///---- метод так и не разбил
     mutating func chooseCard(at index: Int) {
         print("choosed card at index: \(index)")
         
@@ -102,7 +108,7 @@ struct SetGame {
     }
     
     mutating func replaceCardsInTheSet() {
-        if self.deck.count > 2 && self.setOnTable.count == self.numberOfCardsInTheSet {
+        if self.deck.count > 2 && self.setOnTable.count == self.numberOfCardsInSet {
             for card in self.setOnTable {
                 self.table[self.table.index(of: card)!] = self.deck.remove(at: 0)
             }
@@ -119,7 +125,7 @@ struct SetGame {
     
     mutating func deal3MoreCards() {
         // replace cards in the set
-        if self.setOnTable.count == self.numberOfCardsInTheSet {
+        if self.setOnTable.count == self.numberOfCardsInSet {
             self.replaceCardsInTheSet()
             self.selectedCards.removeAll()
             self.setOnTable.removeAll()

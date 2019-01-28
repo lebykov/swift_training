@@ -7,20 +7,21 @@
 //
 
 import Foundation
+
+///--- Стуктуру здесь не смогли бы использовать ?
 class Card: Hashable {
     
     // making Card to conform to Hashable protocol
     // in swift 4.1 Hashable protocol conformance
     // is enabled by default
-    var hashValue: Int { return identifier}
+    var hashValue: Int { return self.identifier }
 
-    static func ==(lhs: Card, rhs:Card) -> Bool {
-        return
-            lhs.identifier == rhs.identifier &&
-            lhs.color == rhs.color &&
-            lhs.number == rhs.number &&
-            lhs.shading == rhs.shading &&
-            lhs.symbol == rhs.symbol
+    static func ==(lhs: Card, rhs: Card) -> Bool {
+		return lhs.identifier == rhs.identifier
+			&& lhs.color == rhs.color
+			&& lhs.number == rhs.number
+			&& lhs.shading == rhs.shading
+			&& lhs.symbol == rhs.symbol
     }
     
     private var identifier: Int
@@ -35,7 +36,8 @@ class Card: Hashable {
         Card.identifierFactory += 1
         return Card.identifierFactory
     }
-    
+    ///--- Обычно все public методы/проперти документируются на русском языке в javadoc-стиле
+	/// Для этого ставим курсом перед методом/пропертью и нажимаем cmd+alt+/ и дозаполянем
     init(number: Int, symbol: Int, shading: Int, color: Int) {
         self.identifier = Card.getUniqueIdentifier()
         self.color = color
