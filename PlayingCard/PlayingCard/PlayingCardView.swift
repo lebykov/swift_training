@@ -8,11 +8,12 @@
 
 import UIKit
 
+///--- Добавить везде self к внутренним методам и пропертям для повышения читаемости
 class PlayingCardView: UIView {
     
-    var rank: Int = 5 { didSet { setNeedsDisplay(); setNeedsLayout() } }
-    var suit: String = "♥️" { didSet { setNeedsDisplay(); setNeedsLayout() } }
-    var isFaceUp: Bool = true { didSet { setNeedsDisplay(); setNeedsLayout() } }
+    var rank: Int = 5 { didSet { self.setNeedsDisplay(); self.setNeedsLayout() } }
+    var suit: String = "♥️" { didSet { self.setNeedsDisplay(); self.setNeedsLayout() } }
+    var isFaceUp: Bool = true { didSet { self.setNeedsDisplay(); self.setNeedsLayout() } }
 
     private func centeredAttributedString(_ string: String, fontSize: CGFloat) -> NSAttributedString {
         var font = UIFont.preferredFont(forTextStyle: .body).withSize(fontSize)
@@ -23,32 +24,36 @@ class PlayingCardView: UIView {
     }
     
     private var cornerString: NSAttributedString {
-        return centeredAttributedString(rankString + "\n" + suit, fontSize: cornerFontSize)
+        return self.centeredAttributedString(rankString + "\n" + suit, fontSize: self.cornerFontSize)
     }
     
-    private lazy var upperLeftCornerLabel = createCornerLabel()
-    private lazy var lowerRightCornerLabel = createCornerLabel()
+    private lazy var upperLeftCornerLabel = self.createCornerLabel()
+    private lazy var lowerRightCornerLabel = self.createCornerLabel()
     
     private func createCornerLabel() -> UILabel {
         let label = UILabel()
         label.numberOfLines = 0 // use as many lines as you need
-        addSubview(label)       // tell system to draw this label
+        self.addSubview(label)       // tell system to draw this label
         return label
     }
     
     private func configureCornerLabel(_ label: UILabel) {
         label.attributedText = cornerString
-        label.frame.size = CGSize.zero  // because if width != 0 label won't
+        label.frame.size = .zero  // because if width != 0 label won't
         label.sizeToFit()               // be sized to fit
         label.isHidden = !isFaceUp
     }
-    
+	
+	///--- Сначала private затем internal потом опять private - причесать
     // triggers redraw of the view when size of the font in ios is changed
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         setNeedsDisplay()
         setNeedsLayout()
     }
-    
+	
+	
+    ///--- С переопределением этого метода надо быть аккуратным
+	///--- Из доки You should override this method only if the autoresizing and constraint-based behaviors of the subviews do not offer the behavior you want.
     override func layoutSubviews() { // called by the system to layout subviews
         super.layoutSubviews()
         configureCornerLabel(upperLeftCornerLabel)
@@ -62,7 +67,8 @@ class PlayingCardView: UIView {
             .offsetBy(dx: -cornerOffset, dy: -cornerOffset)
             .offsetBy(dx: -lowerRightCornerLabel.frame.size.width, dy: -lowerRightCornerLabel.frame.size.height)
     }
-    
+	
+	///--- Помним, что в проде при делении на переменную, ВСЕГДА надо проверять что она не равна 0
     private func drawPips() {
         let pipsPerRowForRank = [[0], [1], [1,1], [1,1,1], [2,2], [2,1,2], [2,2,2], [2,1,2,2], [2,2,2,2], [2,2,1,2,2], [2,2,2,2,2]]
         
@@ -79,7 +85,7 @@ class PlayingCardView: UIView {
                 return probablyOkayPipString
             }
         }
-        
+		
         if pipsPerRowForRank.indices.contains(rank) {
             let pipsPerRow = pipsPerRowForRank[rank]
             var pipRect = bounds.insetBy(dx: cornerOffset, dy: cornerOffset).insetBy(dx: cornerString.size().width, dy: cornerString.size().height / 2)
@@ -103,18 +109,19 @@ class PlayingCardView: UIView {
         roundedRect.addClip()
         UIColor.white.setFill()
         roundedRect.fill()
-        
-        if isFaceUp {
-            if let faceCardImage = UIImage(named: rankString + suit) {
-                faceCardImage.draw(in: bounds.zoom(by: SizeRatio.faceCardImageSizeToBoundsSize))
-            } else {
-                drawPips()
-                }
-        } else {
-            if let cardBackImage = UIImage(named: "cardback") {
-                cardBackImage.draw(in: bounds)
-            }
-        }
+		
+		/// Давай запишем так, чтоб не было двойной вложенности
+		if isFaceUp {
+			if let faceCardImage = UIImage(named: rankString + suit) {
+				faceCardImage.draw(in: bounds.zoom(by: SizeRatio.faceCardImageSizeToBoundsSize))
+			} else {
+				drawPips()
+			}
+		} else {
+			if let cardBackImage = UIImage(named: "cardback") {
+				cardBackImage.draw(in: bounds)
+			}
+		}
     }
 }
 

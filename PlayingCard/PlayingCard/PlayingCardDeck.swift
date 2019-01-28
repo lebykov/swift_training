@@ -13,6 +13,7 @@ struct PlayingCardDeck
     private(set) var cards = [PlayingCard]()
     
     init() {
+		// в одну строчку запишем ?
         for suit in PlayingCard.Suit.all {
             for rank in PlayingCard.Rank.all {
                 cards.append(PlayingCard(suit: suit, rank: rank))
@@ -21,16 +22,17 @@ struct PlayingCardDeck
     }
     
     mutating func draw() -> PlayingCard? {
-        if cards.count > 0 {
-            return cards.remove(at: cards.count.arc4random)
-        } else {
-            return nil
-        }
+//        if cards.count > 0 {
+//            return cards.remove(at: cards.count.arc4random)
+//        } else {
+//            return nil
+//        }
+		return cards.count > 0 ? cards.remove(at: cards.count.arc4random) : nil
     }
 }
 
 extension Int {
-    // я б switch здесь заюзал
+    // я б switch здесь заюзал. Копипаст плохо)
     var arc4random: Int {
         switch self {
         case 1...:

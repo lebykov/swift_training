@@ -8,39 +8,42 @@
 
 import Foundation
 
-struct PlayingCard: CustomStringConvertible
-{
-    var description: String {
-        return "\(rank) \(suit)"
+struct PlayingCard: CustomStringConvertible {
+
+	var description: String {
+        return "\(self.rank) \(self.suit)"
     }
     
     var suit: Suit
     var rank: Rank
     
     enum Suit: String, CustomStringConvertible {
-        var description: String { return rawValue }
-        
+		
         case spades = "♠️"
         case hearts = "♥️"
         case diamonds = "♦️"
         case clubs = "♣️"
-        
-        static var all = [Suit.spades, .hearts, .diamonds, .clubs]
+		
+		var description: String { return self.rawValue }
+		
+		///--- c swift 4 надо юзать протокол CaseIterable и свойство .allCases
+		static var all: [Suit] = [.spades, .hearts, .diamonds, .clubs]
     }
-    
+	
     enum Rank: CustomStringConvertible {
-        var description: String {
-            switch self {
-            case .ace: return "A"
-            case Rank.numeric(let pips): return String(pips)
-            case Rank.face(let kind): return kind
-            }
-        }
-        
+		
         case ace
         case face(String)
         case numeric(Int)
-        
+		
+		var description: String {
+			switch self {
+			case .ace: return "A"
+			case Rank.numeric(let pips): return String(pips)
+			case Rank.face(let kind): return kind
+			}
+		}
+		
         var order: Int {
             switch self {
             case .ace: return 1
@@ -57,6 +60,8 @@ struct PlayingCard: CustomStringConvertible
             for pips in 2...10 {
                 allRanks.append(Rank.numeric(pips))
             }
+			/// юзаем функциональщину и фишки свифта
+			let allRanks2 = (2...10).map { Rank.numeric($0) }
             allRanks += [Rank.face("J"), .face("Q"), .face("K")]
             return allRanks
         }

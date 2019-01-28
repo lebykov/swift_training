@@ -19,6 +19,7 @@ class ViewController: UIViewController {
         for card in deck.cards {
             print(card)
         }
+		deck.cards.forEach { print($0) }
     }
 
 
