@@ -60,7 +60,7 @@ struct PlayingCard: CustomStringConvertible {
             for pips in 2...10 {
                 allRanks.append(Rank.numeric(pips))
             }
-			/// юзаем функциональщину и фишки свифта
+            //FIXME: юзаем функциональщину и фишки свифта
 			let allRanks2 = (2...10).map { Rank.numeric($0) }
             allRanks += [Rank.face("J"), .face("Q"), .face("K")]
             return allRanks

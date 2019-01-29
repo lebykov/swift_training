@@ -13,7 +13,7 @@ struct PlayingCardDeck
     private(set) var cards = [PlayingCard]()
     
     init() {
-		// в одну строчку запишем ?
+        //FIXME: в одну строчку запишем ?
         for suit in PlayingCard.Suit.all {
             for rank in PlayingCard.Rank.all {
                 cards.append(PlayingCard(suit: suit, rank: rank))

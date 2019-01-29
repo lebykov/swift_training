@@ -8,12 +8,27 @@
 
 import UIKit
 
-///--- Добавить везде self к внутренним методам и пропертям для повышения читаемости
+//FIXME:--- Добавить везде self к внутренним методам и пропертям для повышения читаемости
+@IBDesignable   // makes images appear in Interface Builder
 class PlayingCardView: UIView {
     
-    var rank: Int = 5 { didSet { self.setNeedsDisplay(); self.setNeedsLayout() } }
+    @IBInspectable // makes this prop visible in Inteface Builder
+    var rank: Int = 11 { didSet { self.setNeedsDisplay(); self.setNeedsLayout() } }
+    @IBInspectable
     var suit: String = "♥️" { didSet { self.setNeedsDisplay(); self.setNeedsLayout() } }
+    @IBInspectable
     var isFaceUp: Bool = true { didSet { self.setNeedsDisplay(); self.setNeedsLayout() } }
+    
+    var faceCardScale: CGFloat = SizeRatio.faceCardImageSizeToBoundsSize { didSet {setNeedsDisplay() } }
+    
+    @objc func adjustFaceCardScale(byHandlingGesturerecognizerBy recognizer: UIPinchGestureRecognizer) {
+        switch recognizer.state {
+        case .changed, .ended:
+            faceCardScale *= recognizer.scale
+            recognizer.scale = 1.0
+        default: break
+        }
+    }
 
     private func centeredAttributedString(_ string: String, fontSize: CGFloat) -> NSAttributedString {
         var font = UIFont.preferredFont(forTextStyle: .body).withSize(fontSize)
@@ -44,7 +59,7 @@ class PlayingCardView: UIView {
         label.isHidden = !isFaceUp
     }
 	
-	///--- Сначала private затем internal потом опять private - причесать
+    //FIXME: --- Сначала private затем internal потом опять private - причесать
     // triggers redraw of the view when size of the font in ios is changed
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         setNeedsDisplay()
@@ -68,7 +83,7 @@ class PlayingCardView: UIView {
             .offsetBy(dx: -lowerRightCornerLabel.frame.size.width, dy: -lowerRightCornerLabel.frame.size.height)
     }
 	
-	///--- Помним, что в проде при делении на переменную, ВСЕГДА надо проверять что она не равна 0
+    //FIXME:--- Помним, что в проде при делении на переменную, ВСЕГДА надо проверять что она не равна 0
     private func drawPips() {
         let pipsPerRowForRank = [[0], [1], [1,1], [1,1,1], [2,2], [2,1,2], [2,2,2], [2,1,2,2], [2,2,2,2], [2,2,1,2,2], [2,2,2,2,2]]
         
@@ -110,15 +125,16 @@ class PlayingCardView: UIView {
         UIColor.white.setFill()
         roundedRect.fill()
 		
-		/// Давай запишем так, чтоб не было двойной вложенности
+        //FIXME: Давай запишем так, чтоб не было двойной вложенности
+        // Arguments "in:" and "compatibleWith:" makes images appear in Interface Builder
 		if isFaceUp {
-			if let faceCardImage = UIImage(named: rankString + suit) {
-				faceCardImage.draw(in: bounds.zoom(by: SizeRatio.faceCardImageSizeToBoundsSize))
+            if let faceCardImage = UIImage(named: rankString + suit, in: Bundle(for: self.classForCoder), compatibleWith: traitCollection) {
+				faceCardImage.draw(in: bounds.zoom(by: faceCardScale))
 			} else {
 				drawPips()
 			}
 		} else {
-			if let cardBackImage = UIImage(named: "cardback") {
+			if let cardBackImage = UIImage(named: "cardback", in: Bundle(for: self.classForCoder), compatibleWith: traitCollection) {
 				cardBackImage.draw(in: bounds)
 			}
 		}
