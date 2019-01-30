@@ -17,7 +17,7 @@ struct PlayingCard: CustomStringConvertible {
     var suit: Suit
     var rank: Rank
     
-    enum Suit: String, CustomStringConvertible {
+    enum Suit: String, CustomStringConvertible, CaseIterable {
 		
         case spades = "♠️"
         case hearts = "♥️"
@@ -27,7 +27,8 @@ struct PlayingCard: CustomStringConvertible {
 		var description: String { return self.rawValue }
 		
 		///--- c swift 4 надо юзать протокол CaseIterable и свойство .allCases
-		static var all: [Suit] = [.spades, .hearts, .diamonds, .clubs]
+        //DONE
+        static var all: [Suit] = Suit.allCases
     }
 	
     enum Rank: CustomStringConvertible {
