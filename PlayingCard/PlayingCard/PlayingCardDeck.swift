@@ -13,8 +13,7 @@ struct PlayingCardDeck
     private(set) var cards = [PlayingCard]()
     
     init() {
-        //FIXME: в одну строчку запишем ?
-        //?
+        //FIXME: чет я тож не придумаю
         for suit in PlayingCard.Suit.all {
             for rank in PlayingCard.Rank.all {
                 cards.append(PlayingCard(suit: suit, rank: rank))
@@ -28,8 +27,6 @@ struct PlayingCardDeck
 }
 
 extension Int {
-    // я б switch здесь заюзал. Копипаст плохо)
-    // pepe emojii
     var arc4random: Int {
         switch self {
         case 1...:

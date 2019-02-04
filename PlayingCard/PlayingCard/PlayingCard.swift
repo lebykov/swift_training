@@ -26,8 +26,7 @@ struct PlayingCard: CustomStringConvertible {
 		
 		var description: String { return self.rawValue }
 		
-		///--- c swift 4 надо юзать протокол CaseIterable и свойство .allCases
-        //DONE
+		///--- Отдельную пропертю лучше не делать, а прям в клиентском коде вызывать Suit.allCases
         static var all: [Suit] = Suit.allCases
     }
 	

@@ -8,8 +8,6 @@
 
 import UIKit
 
-//FIXME:--- Добавить везде self к внутренним методам и пропертям для повышения читаемости
-//DONE
 @IBDesignable   // makes images appear in Interface Builder
 class PlayingCardView: UIView {
     
@@ -51,10 +49,10 @@ class PlayingCardView: UIView {
         label.isHidden = !self.isFaceUp
     }
 	
-    //FIXME:--- Помним, что в проде при делении на переменную, ВСЕГДА надо проверять что она не равна 0
-    //DONE
     private func drawPips() {
-        let pipsPerRowForRank = [[0], [1], [1,1], [1,1,1], [2,2], [2,1,2], [2,2,2], [2,1,2,2], [2,2,2,2], [2,2,1,2,2], [2,2,2,2,2]]
+        let pipsPerRowForRank = [[0], [1], [1,1],
+								 [1,1,1], [2,2], [2,1,2], [2,2,2],
+								 [2,1,2,2], [2,2,2,2], [2,2,1,2,2], [2,2,2,2,2]]
         
         func createPipsString(thatFits pipRect: CGRect) -> NSAttributedString {
             let maxVerticalPipCount = CGFloat(pipsPerRowForRank.reduce(0) { max($1.count, $0) })
@@ -66,14 +64,15 @@ class PlayingCardView: UIView {
             let attemptedPipString = self.centeredAttributedString(self.suit, fontSize: verticalPipRowSpacing)
             
             if attemptedPipString.size().height.isZero || verticalPipRowSpacing.isZero { return NSAttributedString() }
-            
+			
+			///--- probablyOkay это как ? нейминг не очень
             let probablyOkayStringFontSize = verticalPipRowSpacing / (attemptedPipString.size().height / verticalPipRowSpacing)
             let probablyOkayPipString = self.centeredAttributedString(self.suit, fontSize: probablyOkayStringFontSize)
             
             if maxHorizontalPipCount.isZero
                 || pipRect.size.width.isZero
                 || probablyOkayPipString.size().width.isZero {
-                return NSAttributedString()
+                return NSAttributedString() /// в таких кейсах лучше возращать nil, иначе не поймем снаружи что что-то не так
             }
             
             if probablyOkayPipString.size().width > pipRect.size.width / maxHorizontalPipCount {
@@ -85,11 +84,12 @@ class PlayingCardView: UIView {
 		
         if pipsPerRowForRank.indices.contains(self.rank) {
             let pipsPerRow = pipsPerRowForRank[self.rank]
-            var pipRect = bounds.insetBy(dx: self.cornerOffset, dy: self.cornerOffset).insetBy(dx: self.cornerString.size().width, dy: self.cornerString.size().height / 2)
+            var pipRect = self.bounds.insetBy(dx: self.cornerOffset, dy: self.cornerOffset).insetBy(dx: self.cornerString.size().width, dy: self.cornerString.size().height / 2)
             let pipString = createPipsString(thatFits: pipRect)
-            
+			
+			///--- проверка на пустой массив лучше так pipsPerRow.isEmpty
             if CGFloat(pipsPerRow.count).isZero { return }
-            
+			
             let pipRowSpacing  = pipRect.size.height / CGFloat(pipsPerRow.count)
             pipRect.size.height = pipString.size().height
             pipRect.origin.y += (pipRowSpacing - pipRect.size.height) / 2
@@ -106,7 +106,9 @@ class PlayingCardView: UIView {
     
     private func drawCardFace() {
         // Arguments "in:" and "compatibleWith:" makes images appear in Interface Builder
-        if let faceCardImage = UIImage(named: self.rankString + self.suit, in: Bundle(for: self.classForCoder), compatibleWith: traitCollection) {
+        if let faceCardImage = UIImage(named: self.rankString + self.suit,
+									   in: Bundle(for: self.classForCoder),
+									   compatibleWith: traitCollection) {
             faceCardImage.draw(in: bounds.zoom(by: self.faceCardScale))
         } else {
             self.drawPips()
@@ -114,7 +116,9 @@ class PlayingCardView: UIView {
     }
     
     private func drawCardBack() {
-        if let cardBackImage = UIImage(named: "cardback", in: Bundle(for: self.classForCoder), compatibleWith: traitCollection) {
+        if let cardBackImage = UIImage(named: "cardback",
+									   in: Bundle(for: self.classForCoder),
+									   compatibleWith: traitCollection) {
             cardBackImage.draw(in: bounds)
         }
     }
@@ -133,23 +137,15 @@ class PlayingCardView: UIView {
         roundedRect.addClip()
         UIColor.white.setFill()
         roundedRect.fill()
-		
-        //FIXME: Давай запишем так, чтоб не было двойной вложенности
-        //DONE
         self.isFaceUp ? self.drawCardFace() : self.drawCardBack()
     }
     
-    //FIXME: --- Сначала private затем internal потом опять private - причесать
-    //DONE
     // triggers redraw of the view when size of the font in ios is changed
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         self.setNeedsDisplay()
         self.setNeedsLayout()
     }
     
-    ///--- С переопределением этого метода надо быть аккуратным
-    ///--- Из доки You should override this method only if the autoresizing and constraint-based behaviors of the subviews do not offer the behavior you want.
-    //OK
     override func layoutSubviews() { // called by the system to layout subviews
         super.layoutSubviews()
         self.configureCornerLabel(self.upperLeftCornerLabel)
@@ -212,9 +208,9 @@ extension CGRect {
         return CGRect(origin: origin, size: size)
     }
     func zoom(by scale: CGFloat) -> CGRect {
-        let newWidth = width * scale
-        let newHeight = height * scale
-        return insetBy(dx: (width - newWidth) / 2, dy: (height - newHeight) / 2)
+        let newWidth = self.width * scale
+        let newHeight = self.height * scale
+        return insetBy(dx: (self.width - newWidth) / 2, dy: (self.height - newHeight) / 2)
     }
 }
 
