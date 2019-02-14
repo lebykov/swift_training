@@ -1,18 +1,18 @@
 //
 //  ViewController.swift
-//  SetGame
+//  GraphicalSet
 //
-//  Created by Быков Алексей on 14.04.2018.
-//  Copyright © 2018 abykov. All rights reserved.
+//  Created by Быков Алексей on 14/02/2019.
+//  Copyright © 2019 abykov. All rights reserved.
 //
 
 import UIKit
 
 class ViewController: UIViewController {
     
-    private lazy var game = SetGame()
+    private lazy var game = GraphicalSetGame()
     private let cardSymbols = ["▲", "●", "■"]
-
+    
     @IBOutlet var cardButtons: [UIButton]! {
         didSet { self.updateView(from: self.game) }
     }
@@ -29,7 +29,7 @@ class ViewController: UIViewController {
     
     @IBAction func touchStartNewGameButton(_ sender: UIButton) {
         print("touched New Game button")
-        self.game = SetGame()
+        self.game = GraphicalSetGame()
         self.updateView(from: self.game)
     }
     
@@ -45,22 +45,22 @@ class ViewController: UIViewController {
     }
     
     /// Разбить на функции
-    private func updateView(from model: SetGame) {
+    private func updateView(from model: GraphicalSetGame) {
         self.toggleDeal3MoreCardsButton(from: model)
         self.updateScoreLabel(with: model.score)
-		/// Кусок ниже тоже бы в отдельную функцию
-			for index in self.cardButtons.indices {
-				let button = self.cardButtons[index] /// про проверку границ надеюсь помнишь!
-				self.hideCardButton(button: button)
-				if index < model.table.count {
-					let cardOnTheTable = model.table[index]
-					self.applyCardSymbolsForButton(card: cardOnTheTable, button: button)
-					self.drawBorderAroundCardButton(card: cardOnTheTable, button: button)
-					if model.deck.count == 0 && model.matchedCards.contains(cardOnTheTable) {
-						self.hideCardButton(button: button)
-					}
-				}
-			}
+        /// Кусок ниже тоже бы в отдельную функцию
+        for index in self.cardButtons.indices {
+            let button = self.cardButtons[index] /// про проверку границ надеюсь помнишь!
+            self.hideCardButton(button: button)
+            if index < model.table.count {
+                let cardOnTheTable = model.table[index]
+                self.applyCardSymbolsForButton(card: cardOnTheTable, button: button)
+                self.drawBorderAroundCardButton(card: cardOnTheTable, button: button)
+                if model.deck.count == 0 && model.matchedCards.contains(cardOnTheTable) {
+                    self.hideCardButton(button: button)
+                }
+            }
+        }
     }
     
     private func getSymbolColorByPropertyValue(value: Int) -> (UIColor) {
@@ -82,7 +82,7 @@ class ViewController: UIViewController {
         }
     }
     
-    private func toggleDeal3MoreCardsButton(from model: SetGame) {
+    private func toggleDeal3MoreCardsButton(from model: GraphicalSetGame) {
         // Turn on/off Deal3MoreCardsButton
         // Active
         // 1. Less then 24 cards on the table
@@ -123,7 +123,7 @@ class ViewController: UIViewController {
         button.layer.borderWidth = 0
     }
     
-    private func drawBorderAroundCardButton(card: Card, button: UIButton) {        
+    private func drawBorderAroundCardButton(card: Card, button: UIButton) {
         button.layer.borderWidth = 0
         if self.game.isMaxNumerOfCardsSelected() {
             if self.game.setOnTable.contains(card) {
@@ -141,3 +141,4 @@ class ViewController: UIViewController {
         }
     }
 }
+
