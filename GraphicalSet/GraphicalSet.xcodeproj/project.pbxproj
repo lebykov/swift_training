@@ -15,6 +15,7 @@
 		8F07D77F2215FE7E00869B6A /* GraphicalSetGame.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F07D77E2215FE7E00869B6A /* GraphicalSetGame.swift */; };
 		8F07D7812215FEBD00869B6A /* Card.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F07D7802215FEBD00869B6A /* Card.swift */; };
 		8F07D7832216002600869B6A /* Grid.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F07D7822216002600869B6A /* Grid.swift */; };
+		8F54F18B2219A988006E6115 /* CardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F54F18A2219A988006E6115 /* CardView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,6 +29,7 @@
 		8F07D77E2215FE7E00869B6A /* GraphicalSetGame.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphicalSetGame.swift; sourceTree = "<group>"; };
 		8F07D7802215FEBD00869B6A /* Card.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Card.swift; sourceTree = "<group>"; };
 		8F07D7822216002600869B6A /* Grid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Grid.swift; sourceTree = "<group>"; };
+		8F54F18A2219A988006E6115 /* CardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -63,6 +65,7 @@
 				8F07D76C2215FD1F00869B6A /* AppDelegate.swift */,
 				8F07D76E2215FD1F00869B6A /* ViewController.swift */,
 				8F07D7822216002600869B6A /* Grid.swift */,
+				8F54F18A2219A988006E6115 /* CardView.swift */,
 				8F07D7702215FD1F00869B6A /* Main.storyboard */,
 				8F07D77E2215FE7E00869B6A /* GraphicalSetGame.swift */,
 				8F07D7802215FEBD00869B6A /* Card.swift */,
@@ -148,6 +151,7 @@
 				8F07D77F2215FE7E00869B6A /* GraphicalSetGame.swift in Sources */,
 				8F07D76D2215FD1F00869B6A /* AppDelegate.swift in Sources */,
 				8F07D7832216002600869B6A /* Grid.swift in Sources */,
+				8F54F18B2219A988006E6115 /* CardView.swift in Sources */,
 				8F07D7812215FEBD00869B6A /* Card.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -13,9 +13,15 @@ class ViewController: UIViewController {
     private lazy var game = GraphicalSetGame()
     private let cardSymbols = ["▲", "●", "■"]
     
-    @IBOutlet var cardButtons: [UIButton]! {
-        didSet { self.updateView(from: self.game) }
+    @IBOutlet weak var cardsContainer: UIView! {
+        didSet {
+            let cardRect = CGRect(x: 20, y: 20, width: 200, height: 350)
+            let cardView = CardView(frame: cardRect)
+            self.cardsContainer.addSubview(cardView)
+        }
     }
+    
+    
     
     @IBOutlet private weak var scoreLabel: UILabel! {
         didSet { self.updateScoreLabel(with: self.game.score) }
@@ -37,30 +43,23 @@ class ViewController: UIViewController {
         didSet { self.toggleDeal3MoreCardsButton(from: self.game) }
     }
     
-    @IBAction func touchCardButton(_ sender: UIButton) {
-        if let cardIndex = cardButtons.index(of: sender) {
-            self.game.chooseCard(at: cardIndex)
-            self.updateView(from: self.game)
-        }
-    }
-    
     /// Разбить на функции
     private func updateView(from model: GraphicalSetGame) {
         self.toggleDeal3MoreCardsButton(from: model)
         self.updateScoreLabel(with: model.score)
         /// Кусок ниже тоже бы в отдельную функцию
-        for index in self.cardButtons.indices {
-            let button = self.cardButtons[index] /// про проверку границ надеюсь помнишь!
-            self.hideCardButton(button: button)
-            if index < model.table.count {
-                let cardOnTheTable = model.table[index]
-                self.applyCardSymbolsForButton(card: cardOnTheTable, button: button)
-                self.drawBorderAroundCardButton(card: cardOnTheTable, button: button)
-                if model.deck.count == 0 && model.matchedCards.contains(cardOnTheTable) {
-                    self.hideCardButton(button: button)
-                }
-            }
-        }
+//        for index in self.cardButtons.indices {
+//            let button = self.cardButtons[index] /// про проверку границ надеюсь помнишь!
+//            self.hideCardButton(button: button)
+//            if index < model.table.count {
+//                let cardOnTheTable = model.table[index]
+//                self.applyCardSymbolsForButton(card: cardOnTheTable, button: button)
+//                self.drawBorderAroundCardButton(card: cardOnTheTable, button: button)
+//                if model.deck.count == 0 && model.matchedCards.contains(cardOnTheTable) {
+//                    self.hideCardButton(button: button)
+//                }
+//            }
+//        }
     }
     
     private func getSymbolColorByPropertyValue(value: Int) -> (UIColor) {
