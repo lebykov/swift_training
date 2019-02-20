@@ -10,13 +10,14 @@ import UIKit
 
 class CardView: UIView {
     
-    var number: Int = 3
-    var symbol: Int = 3
-    var shading: Int = 1
-    var color: Int = 2
+    var number: Int = 2
+    var symbol: Int = 2
+    var shading: Int = 3
+    var color: Int = 1
     
     private struct CardViewConstants {
         static let paddingCoefficient: CGFloat = 0.05
+        static let shadingNumberOfLines: Int = 30
     }
     
     lazy var symbolRectSideLenght: CGFloat = [self.bounds.width, self.bounds.height / 3].min() ?? 0.0
@@ -36,24 +37,27 @@ class CardView: UIView {
     }
     
     override func draw(_ rect: CGRect) {
-        for positions in self.calculateSymbolsPositions() {
-            self.drawSymbol(in: positions)
+        for position in self.calculateSymbolsPositions() {
+            let symbolPath = self.drawSymbol(in: position)
+            self.setShading(for: symbolPath, in: position)
         }
     }
     
-    private func drawDiamond(in rect: CGRect) {
+    private func drawDiamond(in rect: CGRect) -> UIBezierPath {
         let diamondPath = UIBezierPath()
-        diamondPath.move(to: CGPoint(x: rect.midX - rect.size.width / 2, y: rect.midY))
-        diamondPath.addLine(to: CGPoint(x: rect.midX, y: rect.midY - rect.size.height * 0.25))
-        diamondPath.addLine(to: CGPoint(x: rect.midX + rect.size.width / 2, y: rect.midY))
-        diamondPath.addLine(to: CGPoint(x: rect.midX, y: rect.midY + rect.size.height * 0.25))
+        diamondPath.move(to: CGPoint(x: rect.midX - rect.size.width / 2,
+                                     y: rect.midY))
+        diamondPath.addLine(to: CGPoint(x: rect.midX,
+                                        y: rect.midY - rect.size.height * 0.25))
+        diamondPath.addLine(to: CGPoint(x: rect.midX + rect.size.width / 2,
+                                        y: rect.midY))
+        diamondPath.addLine(to: CGPoint(x: rect.midX,
+                                        y: rect.midY + rect.size.height * 0.25))
         diamondPath.close()
-
-        self.getSymbolColor().setFill()
-        diamondPath.fill()
+        return diamondPath
     }
     
-    private func drawOval(in rect: CGRect) {
+    private func drawOval(in rect: CGRect) -> UIBezierPath {
         let ovalPath = UIBezierPath()
         ovalPath.move(to: CGPoint(x: rect.midX - rect.size.width * 0.25,
                                   y: rect.midY - rect.size.height * 0.25))
@@ -74,30 +78,85 @@ class CardView: UIView {
                         endAngle: CGFloat.pi * 1.5,
                         clockwise: true)
         ovalPath.close()
-        self.getSymbolColor().setFill()
-        ovalPath.fill()
+        return ovalPath
     }
     
-    private func drawTriangle(in rect: CGRect) {
-        let trianglePath = UIBezierPath()
-        trianglePath.move(to: CGPoint(x: rect.origin.x + rect.width / 2.0, y: rect.origin.y))
-        trianglePath.addLine(to: CGPoint(x: rect.origin.x + rect.width, y: rect.origin.y + rect.height))
-        trianglePath.addLine(to: CGPoint(x: rect.origin.x, y: rect.origin.y + rect.height))
-        trianglePath.close()
-        
-        self.getSymbolColor().setFill()
-        trianglePath.fill()
+    private func drawSquiggle(in rect: CGRect) -> UIBezierPath {
+        let squigglePath = UIBezierPath()
+        squigglePath.move(to: CGPoint(x: rect.midX - rect.size.width * 0.4,
+                                      y: rect.midY - rect.size.height * 0.25))
+        squigglePath.addCurve(to: CGPoint(x: rect.midX + rect.size.width * 0.4,
+                                          y: rect.midY - rect.size.height * 0.25),
+                              controlPoint1: CGPoint(x: rect.midX + rect.size.width * 0.15,
+                                                     y: rect.midY - rect.size.height * 0.5),
+                              controlPoint2: CGPoint(x: rect.midX - rect.size.width * 0.15,
+                                                     y: rect.midY))
+        squigglePath.addQuadCurve(to: CGPoint(x: rect.midX + rect.size.width * 0.4,
+                                              y: rect.midY + rect.size.height * 0.25),
+                                  controlPoint: CGPoint(x: rect.midX + rect.size.width * 0.7,
+                                                        y: rect.midY - rect.size.height * 0.25))
+        squigglePath.addCurve(to: CGPoint(x: rect.midX - rect.size.width * 0.4,
+                                          y: rect.midY + rect.size.height * 0.25),
+                              controlPoint1: CGPoint(x: rect.midX - rect.size.width * 0.15,
+                                                     y: rect.midY + rect.size.height * 0.5),
+                              controlPoint2: CGPoint(x: rect.midX + rect.size.width * 0.15,
+                                                     y: rect.midY))
+        squigglePath.addQuadCurve(to: CGPoint(x: rect.midX - rect.size.width * 0.4,
+                                              y: rect.midY - rect.size.height * 0.25),
+                                  controlPoint: CGPoint(x: rect.midX - rect.size.width * 0.7,
+                                                        y: rect.midY + rect.size.height * 0.25))
+        squigglePath.close()
+        return squigglePath
     }
     
-    private func drawSymbol(in rect: CGRect) {
+    private func drawSymbol(in rect: CGRect) -> UIBezierPath {
         switch self.symbol {
         case 1:
-            self.drawTriangle(in: rect)
+            return self.drawSquiggle(in: rect)
         case 2:
-            self.drawOval(in: rect)
+            return self.drawOval(in: rect)
         case 3:
-            self.drawDiamond(in: rect)
+            return self.drawDiamond(in: rect)
         default:
+            // так можно?
+            return UIBezierPath()
+        }
+    }
+    
+    private func setShading(for symbol: UIBezierPath, in rect: CGRect) {
+        switch self.shading {
+        case 1:
+            self.getSymbolColor().setStroke()
+            symbol.lineWidth = self.symbolRectSideLenght * 0.03
+            symbol.stroke()
+        case 2:
+            self.getSymbolColor().setFill()
+            symbol.fill()
+        case 3:
+            if let context = UIGraphicsGetCurrentContext() {
+                context.saveGState()
+                self.getSymbolColor().setStroke()
+                symbol.lineWidth = self.symbolRectSideLenght * 0.03
+                symbol.stroke()
+                symbol.addClip()
+                
+                let shadingPath = UIBezierPath()
+                let shadingDelta = symbolRectSideLenght.rounded(.down) / CGFloat(CardViewConstants.shadingNumberOfLines)
+                for lineNumber in 0..<CardViewConstants.shadingNumberOfLines {
+                    shadingPath.move(to: CGPoint(x: rect.origin.x,
+                                                 y: rect.origin.y + shadingDelta * CGFloat(lineNumber)))
+                    shadingPath.addLine(to: CGPoint(x: rect.origin.x + rect.size.width,
+                                                    y: rect.origin.y + shadingDelta * CGFloat(lineNumber)))
+                }
+                shadingPath.lineWidth = self.symbolRectSideLenght * 0.01
+                shadingPath.stroke()
+                context.restoreGState()
+            } else {
+                // Как быть?
+                print("How to handle?")
+            }
+        default:
+            // Что делать?
             print("How to handle this case?")
         }
     }
@@ -118,7 +177,7 @@ class CardView: UIView {
         return positions
     }
     
-    private func getSymbolColor() -> (UIColor) {
+    private func getSymbolColor() -> UIColor {
         switch self.color {
         case 1:
             return UIColor.green
