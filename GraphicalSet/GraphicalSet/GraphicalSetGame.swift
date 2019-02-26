@@ -105,14 +105,15 @@ struct GraphicalSetGame {
     
     mutating func replaceCardsInTheSet() {
         if self.deck.count > 2 && self.setOnTable.count == self.numberOfCardsInSet {
-            for card in self.setOnTable {
-                self.table[self.table.index(of: card)!] = self.deck.remove(at: 0)
-            }
+            self.setOnTable.forEach { self.table[self.table.index(of: $0)!] = self.deck.remove(at: 0) }
+        } else if self.deck.count == 0 {
+            self.setOnTable.forEach { self.table.remove(at: self.table.index(of: $0)!) }
+            
         }
     }
     
     mutating func addThreeCardsToTable() {
-        if self.deck.count > 2 && self.table.count < 22 {
+        if self.deck.count > 2 {
             for _ in 0..<3 {
                 self.table.append(self.deck.remove(at: 0))
             }

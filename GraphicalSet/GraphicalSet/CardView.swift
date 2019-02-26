@@ -10,10 +10,10 @@ import UIKit
 
 class CardView: UIView {
     
-    var number: Int = 2
-    var symbol: Int = 2
-    var shading: Int = 3
-    var color: Int = 1
+    var number: Int = 2 { didSet { self.setNeedsDisplay() } }
+    var symbol: Int = 2 { didSet { self.setNeedsDisplay() } }
+    var shading: Int = 3 { didSet { self.setNeedsDisplay() } }
+    var color: Int = 1 { didSet { self.setNeedsDisplay() } }
     
     private struct CardViewConstants {
         static let paddingCoefficient: CGFloat = 0.05
@@ -118,7 +118,6 @@ class CardView: UIView {
         case 3:
             return self.drawDiamond(in: rect)
         default:
-            // так можно?
             return UIBezierPath()
         }
     }
@@ -152,12 +151,10 @@ class CardView: UIView {
                 shadingPath.stroke()
                 context.restoreGState()
             } else {
-                // Как быть?
-                print("How to handle?")
+                print("UIGraphicsGetCurrentContext() returned nil")
             }
         default:
-            // Что делать?
-            print("How to handle this case?")
+            print("Unknown shading case")
         }
     }
     
