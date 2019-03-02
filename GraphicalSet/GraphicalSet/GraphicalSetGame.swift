@@ -42,6 +42,20 @@ struct GraphicalSetGame {
         return self.selectedCards.count == self.maxNumberOfSelectedCards
     }
     
+    mutating func shuffleRemainingCards() {
+        let currentNumberOfCardsOnTable = self.table.count
+        self.deck.append(contentsOf: self.table)
+        self.deck.shuffle()
+        self.table.removeAll()
+        self.selectedCards.removeAll()
+        self.setOnTable.removeAll()
+        
+        for index in 0..<currentNumberOfCardsOnTable {
+            self.table.append(self.deck[index])
+        }
+        self.deck.removeSubrange(0..<currentNumberOfCardsOnTable)
+    }
+    
     ///---- метод большой, многа букаф читать сложна непанятна!
     ///---- метод так и не разбил
     //FIXME: разбить на методы

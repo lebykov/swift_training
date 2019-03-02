@@ -17,7 +17,19 @@ class ViewController: UIViewController {
         return cardsContainer.bounds.width / cardsContainer.bounds.height
     }
     
-    @IBOutlet weak var cardsContainer: UIView!
+    @IBOutlet weak var cardsContainer: UIView! {
+        didSet {
+            let swipe = UISwipeGestureRecognizer(
+                target: self, action: #selector(self.handleSwipeCardsContainerView(_:)))
+            swipe.direction = [.down]
+            self.cardsContainer.addGestureRecognizer(swipe)
+            
+            let rotation = UIRotationGestureRecognizer(
+                target: self, action: #selector(self.handleRotationCardsContainerView(_:)))
+            self.cardsContainer.addGestureRecognizer(rotation)
+            
+        }
+    }
     
     @IBOutlet private weak var scoreLabel: UILabel! {
         didSet { self.updateScoreLabel(with: self.game.score) }
@@ -70,10 +82,31 @@ class ViewController: UIViewController {
     }
     
     @objc private func handleTapCardView(_ gestureRecognizer: UIGestureRecognizer) {
-        let cardView: CardView = gestureRecognizer.view as! CardView
-        if let cardIndex = cardsContainer.subviews.firstIndex(of: cardView) {
-            self.game.chooseCard(at: cardIndex)
+        if let view = gestureRecognizer.view {
+            let cardView = view as! CardView
+            if let cardIndex = cardsContainer.subviews.firstIndex(of: cardView) {
+                self.game.chooseCard(at: cardIndex)
+                self.updateView(from: self.game)
+            }
+        }
+        
+    }
+    
+    @objc private func handleSwipeCardsContainerView(_ gestureRecognizer: UIGestureRecognizer) {
+        if self.game.deck.count > 2 || self.game.setOnTable.count == 3 {
+            print("swiped for new cards")
+            self.game.deal3MoreCards()
             self.updateView(from: self.game)
+        }
+    }
+    
+    @objc private func handleRotationCardsContainerView(_ gestureRecognizer: UIGestureRecognizer) {
+        switch gestureRecognizer.state {
+        case .ended:
+            self.game.shuffleRemainingCards()
+            self.updateView(from: self.game)
+        default:
+            print("default")
         }
     }
     
