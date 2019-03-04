@@ -15,7 +15,7 @@ class CardView: UIView {
     var shading: Int = 3 { didSet { self.setNeedsDisplay() } }
     var color: Int = 1 { didSet { self.setNeedsDisplay() } }
     
-    private struct CardViewConstants {
+    private struct CardViewConstants {  // private между public-ами
         static let paddingCoefficient: CGFloat = 0.05
         static let shadingNumberOfLines: Int = 30
     }
@@ -36,7 +36,7 @@ class CardView: UIView {
         self.backgroundColor = UIColor.lightGray
     }
     
-    override func draw(_ rect: CGRect) {
+    override func draw(_ rect: CGRect) {   // internal между private-ами
         for position in self.calculateSymbolsPositions() {
             let symbolPath = self.drawSymbol(in: position)
             self.setShading(for: symbolPath, in: position)
@@ -111,7 +111,7 @@ class CardView: UIView {
     
     private func drawSymbol(in rect: CGRect) -> UIBezierPath {
         switch self.symbol {
-        case 1:
+        case 1: // не совсем понятно откуда такая зависимость между цифрами и фигурами
             return self.drawSquiggle(in: rect)
         case 2:
             return self.drawOval(in: rect)
@@ -132,7 +132,7 @@ class CardView: UIView {
             self.getSymbolColor().setFill()
             symbol.fill()
         case 3:
-            if let context = UIGraphicsGetCurrentContext() {
+            if let context = UIGraphicsGetCurrentContext() { // лучше вынести в отдельную функцию
                 context.saveGState()
                 self.getSymbolColor().setStroke()
                 symbol.lineWidth = self.symbolRectSideLenght * 0.03
@@ -140,7 +140,7 @@ class CardView: UIView {
                 symbol.addClip()
                 
                 let shadingPath = UIBezierPath()
-                let shadingDelta = symbolRectSideLenght.rounded(.down) / CGFloat(CardViewConstants.shadingNumberOfLines)
+                let shadingDelta = symbolRectSideLenght.rounded(.down) / CGFloat(CardViewConstants.shadingNumberOfLines) // проверка на ноль
                 for lineNumber in 0..<CardViewConstants.shadingNumberOfLines {
                     shadingPath.move(to: CGPoint(x: rect.origin.x,
                                                  y: rect.origin.y + shadingDelta * CGFloat(lineNumber)))

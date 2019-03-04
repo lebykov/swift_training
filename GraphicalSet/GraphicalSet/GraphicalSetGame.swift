@@ -10,7 +10,7 @@ import Foundation
 
 struct GraphicalSetGame {
     
-    var deck = [Card]()
+    var deck = [Card]() // из нейминга не совсем следует что это массив и снизу у table
     var table = [Card]()
     var selectedCards = [Card]()
     var matchedCards = [Card]()
@@ -33,11 +33,12 @@ struct GraphicalSetGame {
         self.deck.shuffle()
         
         for index in 0..<self.numberOfCardsOnTable {
-            self.table.append(self.deck[index])
+            self.table.append(self.deck[index]) // упадет ведь
         }
         self.deck.removeSubrange(0..<self.numberOfCardsOnTable)
     }
     
+    // лучше сделать свойством
     func isMaxNumerOfCardsSelected() -> (Bool) {
         return self.selectedCards.count == self.maxNumberOfSelectedCards
     }
@@ -51,13 +52,14 @@ struct GraphicalSetGame {
         self.setOnTable.removeAll()
         
         for index in 0..<currentNumberOfCardsOnTable {
-            self.table.append(self.deck[index])
+            self.table.append(self.deck[index]) // упадет ведь
         }
         self.deck.removeSubrange(0..<currentNumberOfCardsOnTable)
     }
     
     ///---- метод большой, многа букаф читать сложна непанятна!
     ///---- метод так и не разбил
+    ///----- ????? где разбивка
     //FIXME: разбить на методы
     mutating func chooseCard(at index: Int) {
         print("choosed card at index: \(index)")
@@ -119,10 +121,9 @@ struct GraphicalSetGame {
     
     mutating func replaceCardsInTheSet() {
         if self.deck.count > 2 && self.setOnTable.count == self.numberOfCardsInSet {
-            self.setOnTable.forEach { self.table[self.table.index(of: $0)!] = self.deck.remove(at: 0) }
+            self.setOnTable.forEach { self.table[self.table.index(of: $0)!] = self.deck.remove(at: 0) } // высокая вероятность упасть здесь self.table[self.table.index(of: $0)!]
         } else if self.deck.count == 0 {
             self.setOnTable.forEach { self.table.remove(at: self.table.index(of: $0)!) }
-            
         }
     }
     
@@ -135,7 +136,7 @@ struct GraphicalSetGame {
     }
     
     mutating func deal3MoreCards() {
-        // replace cards in the set
+        // replace cards in the set   /// коммент акутален ?
         if self.setOnTable.count == self.numberOfCardsInSet {
             self.replaceCardsInTheSet()
             self.selectedCards.removeAll()
@@ -148,9 +149,6 @@ struct GraphicalSetGame {
     func cartesianProductForCardsProperties() -> [[Int]]{
         let numbersList = [1, 2, 3]
         var productList: [[Int]] = []
-        ///---Жесть)
-        /// Похоже простого решения нет - https://stackoverflow.com/questions/43331168/swift-lazy-cartesian-product
-        /// https://github.com/Oyvindkg/SwiftProductGenerator
         for element1 in numbersList {
             for element2 in numbersList {
                 for element3 in numbersList {

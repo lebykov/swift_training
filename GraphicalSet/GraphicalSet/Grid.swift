@@ -31,13 +31,13 @@ import UIKit
 
 struct Grid
 {
-    enum Layout {
+    enum Layout { // здесь не хватает доки, сложно понять сразу че и как
         case fixedCellSize(CGSize)
         case dimensions(rowCount: Int, columnCount: Int)
         case aspectRatio(CGFloat)
     }
     
-    var layout: Layout { didSet { recalculate() } }
+    var layout: Layout { didSet { self.recalculate() } }
     
     var frame: CGRect { didSet { recalculate() } }
     
@@ -52,7 +52,7 @@ struct Grid
     }
     
     subscript(index: Int) -> CGRect? {
-        return index < cellFrames.count ? cellFrames[index] : nil
+        return index < cellFrames.count ? self.cellFrames[index] : nil
     }
     
     var cellCount: Int {
@@ -97,7 +97,7 @@ struct Grid
     private var cellCountForAspectRatioLayout = 0 { didSet { recalculate() } }
     private var calculatedDimensions: (rowCount: Int, columnCount: Int) = (0, 0)
     
-    private mutating func recalculate() {
+    private mutating func recalculate() {  /// разбить бы
         switch layout {
         case .fixedCellSize(let cellSize):
             if cellSize.width > 0 && cellSize.height > 0 {

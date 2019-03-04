@@ -33,12 +33,13 @@ class Card: Hashable {
     
     private static var identifierFactory = 0
     
-    private static func getUniqueIdentifier() -> Int {
+    private static func getUniqueIdentifier() -> Int { // нарушение первого принципа SOLID
         Card.identifierFactory += 1
         return Card.identifierFactory
     }
-    ///--- Обычно все public методы/проперти документируются на русском языке в javadoc-стиле
-    /// Для этого ставим курсом перед методом/пропертью и нажимаем cmd+alt+/ и дозаполянем
+    
+    // На будущее(в проде) - не забывай документировать все public штуки
+    // А в учебном проекте хорошо было бы документировать хотя бы все названия классов/структур
     /// Создать карту с указанными параметрами
     ///
     /// - Parameters:
