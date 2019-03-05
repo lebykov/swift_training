@@ -14,20 +14,23 @@ class ViewController: UIViewController {
     
     private lazy var grid = Grid(layout: Grid.Layout.aspectRatio(self.cardsContainerAspectRatio))
     private var cardsContainerAspectRatio: CGFloat {
-        return cardsContainer.bounds.width / cardsContainer.bounds.height /// проверка на ноль где ?
+        if !cardsContainer.bounds.height.isEqual(to: 0.0) {
+            return cardsContainer.bounds.width / cardsContainer.bounds.height ///DONE: проверка на ноль где ?
+        } else {
+            return 1.0
+        }
     }
     
     @IBOutlet weak var cardsContainer: UIView! {
         didSet {
-            let swipe = UISwipeGestureRecognizer(target: self,  /// такой перенос предпочтительней у нас в проекте
+            let swipe = UISwipeGestureRecognizer(target: self,  ///OK: такой перенос предпочтительней у нас в проекте
                                                  action: #selector(self.handleSwipeCardsContainerView(_:)))
             swipe.direction = [.down]
             self.cardsContainer.addGestureRecognizer(swipe)
             
-            let rotation = UIRotationGestureRecognizer(
-                target: self, action: #selector(self.handleRotationCardsContainerView(_:)))
+            let rotation = UIRotationGestureRecognizer(target: self,
+                                                       action: #selector(self.handleRotationCardsContainerView(_:)))
             self.cardsContainer.addGestureRecognizer(rotation)
-            
         }
     }
     
@@ -36,13 +39,11 @@ class ViewController: UIViewController {
     }
     
     @IBAction func touchDeal3MoreCardsButton(_ sender: UIButton) {
-        print("touched Deal button")  /// опять принты не убрал
         self.game.deal3MoreCards()
         self.updateView(from: self.game)
     }
     
     @IBAction func touchStartNewGameButton(_ sender: UIButton) {
-        print("touched New Game button")
         self.game = GraphicalSetGame()
         self.updateView(from: self.game)
     }
@@ -57,45 +58,52 @@ class ViewController: UIViewController {
     }
     
     private func manageCardViews() {
-        self.cardsContainer.subviews.forEach { $0.removeFromSuperview() }  // здесь лучше foreach заюзать вместо compactMap, тогда присваивание не понадобится
+        self.cardsContainer.subviews.forEach { $0.removeFromSuperview() }  //OK: здесь лучше foreach заюзать вместо compactMap, тогда присваивание не понадобится
         self.grid.frame = self.cardsContainer.bounds
         self.grid.cellCount = self.game.table.count
         for index in 0..<self.game.table.count {
-            if let cardFrame = self.grid[index] {
-                let cardView = CardView(frame: cardFrame.insetBy(dx: cardFrame.size.width * 0.05, dy: cardFrame.size.width * 0.05))  /// вот этот кусок и ниже лучше в отдельную функцию
-                let card = self.game.table[index]
-                cardView.color = card.color
-                cardView.number = card.number
-                cardView.shading = card.shading
-                cardView.symbol = card.symbol
-                self.cardsContainer.addSubview(cardView)
-                
-                let tapGestureRecognizer = UITapGestureRecognizer(
-                    target: self, action: #selector(self.handleTapCardView(_:)))
-                cardView.addGestureRecognizer(tapGestureRecognizer)
-                
-                self.drawBorderAroundCardView(card: self.game.table[index], cardView: cardView)
-            } else {
-                print("manageCardViews(): self.grid[\(index))] returned nil")
-            }
+            self.setUpCardView(at: index) ///DONE: вот этот кусок и ниже лучше в отдельную функцию
+        }
+    }
+    
+    private func getCardView(for card: Card, in frame: CGRect) -> CardView {
+        let cardView = CardView(frame: frame.insetBy(dx: frame.size.width * 0.05,
+                                                     dy: frame.size.width * 0.05))
+        cardView.color = card.color
+        cardView.number = card.number
+        cardView.shading = card.shading
+        cardView.symbol = card.symbol
+        return cardView
+    }
+    
+    private func setUpCardView(at index: Int) {
+        if let cardFrame = self.grid[index], index < self.game.table.count {
+            let card = self.game.table[index]
+            let cardView = self.getCardView(for: card, in: cardFrame)
+            self.drawBorderAroundCardView(card: card, cardView: cardView)
+            
+            let tapGestureRecognizer = UITapGestureRecognizer(target: self,
+                                                              action: #selector(self.handleTapCardView(_:)))
+            cardView.addGestureRecognizer(tapGestureRecognizer)
+            
+            self.cardsContainer.addSubview(cardView)
+        } else {
+            print("setUpCardView(at index: Int): self.grid[\(index))] returned nil")
         }
     }
     
     @objc private func handleTapCardView(_ gestureRecognizer: UIGestureRecognizer) {
-        if let view = gestureRecognizer.view {
-            if let cardView = view as? CardView { // форс не используем и надо записать с помощью одного if
-                if let cardIndex = cardsContainer.subviews.firstIndex(of: cardView) {
-                    self.game.chooseCard(at: cardIndex)
-                    self.updateView(from: self.game)
-                }
+        if let cardView = gestureRecognizer.view as? CardView { //DONE: форс не используем и надо записать с помощью одного if
+            if let cardIndex = cardsContainer.subviews.firstIndex(of: cardView) {
+                self.game.chooseCard(at: cardIndex)
+                self.updateView(from: self.game)
             }
         }
-        
     }
     
     @objc private func handleSwipeCardsContainerView(_ gestureRecognizer: UIGestureRecognizer) {
-        if self.game.deck.count > 2 || self.game.setOnTable.count == 3 {  // магические цифры лучше в константы
-            print("swiped for new cards")
+        if self.game.deck.count > self.game.maxNumberOfSelectedCards - 1
+            || self.game.setOnTable.count == self.game.numberOfCardsInSet {  //DONE: магические цифры лучше в константы
             self.game.deal3MoreCards()
             self.updateView(from: self.game)
         }
@@ -126,7 +134,8 @@ class ViewController: UIViewController {
     
     private func toggleDeal3MoreCardsButton(from model: GraphicalSetGame) {
         if let deal3MoreCardsButton = self.deal3MoreCardsButton {
-            if model.deck.count > 2 || model.setOnTable.count == 3 { // магические цифры точно в константы
+            if model.deck.count > model.maxNumberOfSelectedCards - 1
+                || model.setOnTable.count == model.numberOfCardsInSet { //DONE: магические цифры точно в константы
                 deal3MoreCardsButton.isEnabled = true
                 deal3MoreCardsButton.setTitleColor(#colorLiteral(red: 0, green: 0.9768045545, blue: 0, alpha: 1), for: .normal)
             } else {
@@ -138,7 +147,7 @@ class ViewController: UIViewController {
 
     private func drawBorderAroundCardView(card: Card, cardView: CardView) {
         cardView.layer.borderWidth = 0
-        if self.game.isMaxNumerOfCardsSelected() { //здесь лучше guard, тогда цикломатическая сложность уменьшиться вроде
+        if self.game.isMaxNumerOfCardsSelected { //HOW TO?: здесь лучше guard, тогда цикломатическая сложность уменьшиться вроде
             if self.game.setOnTable.contains(card) {
                 cardView.layer.borderWidth = 3.0
                 cardView.layer.borderColor = #colorLiteral(red: 0.4666666687, green: 0.7647058964, blue: 0.2666666806, alpha: 1)

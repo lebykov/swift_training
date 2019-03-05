@@ -10,7 +10,7 @@ import Foundation
 
 struct GraphicalSetGame {
     
-    var deck = [Card]() // из нейминга не совсем следует что это массив и снизу у table
+    var deck = [Card]() //HOWTO?: из нейминга не совсем следует что это массив и снизу у table
     var table = [Card]()
     var selectedCards = [Card]()
     var matchedCards = [Card]()
@@ -33,13 +33,15 @@ struct GraphicalSetGame {
         self.deck.shuffle()
         
         for index in 0..<self.numberOfCardsOnTable {
-            self.table.append(self.deck[index]) // упадет ведь
+            if index < self.deck.count {
+                self.table.append(self.deck[index]) //DONE: упадет ведь
+            }
         }
         self.deck.removeSubrange(0..<self.numberOfCardsOnTable)
     }
     
-    // лучше сделать свойством
-    func isMaxNumerOfCardsSelected() -> (Bool) {
+    //DONE: лучше сделать свойством
+    var isMaxNumerOfCardsSelected: Bool {
         return self.selectedCards.count == self.maxNumberOfSelectedCards
     }
     
@@ -52,7 +54,9 @@ struct GraphicalSetGame {
         self.setOnTable.removeAll()
         
         for index in 0..<currentNumberOfCardsOnTable {
-            self.table.append(self.deck[index]) // упадет ведь
+            if index < self.deck.count {
+                self.table.append(self.deck[index]) //DONE: упадет ведь
+            }
         }
         self.deck.removeSubrange(0..<currentNumberOfCardsOnTable)
     }
@@ -60,46 +64,57 @@ struct GraphicalSetGame {
     ///---- метод большой, многа букаф читать сложна непанятна!
     ///---- метод так и не разбил
     ///----- ????? где разбивка
-    //FIXME: разбить на методы
+    //DONE: разбить на методы
     mutating func chooseCard(at index: Int) {
-        print("choosed card at index: \(index)")
-        
+
         if index >= self.table.count { return }
         if self.matchedCards.contains(self.table[index]) { return }
         
         let chosenCard = self.table[index]
         
         if self.selectedCards.count < self.maxNumberOfSelectedCards {
-            if self.selectedCards.contains(chosenCard) {
-                self.selectedCards.remove(at: self.selectedCards.index(of: chosenCard)!)
+            self.selectOrDeselect(card: chosenCard)
+            self.evaluateSelectedCards()
+        } else {
+            self.handleSelectedCardsAfterTapOn(card: chosenCard)
+        }
+    }
+    
+    mutating func selectOrDeselect(card: Card) {
+        if self.selectedCards.contains(card) {
+            if let cardIndex = self.selectedCards.index(of: card) {
+                self.selectedCards.remove(at: cardIndex)
             } else {
-                self.selectedCards.append(chosenCard)
-            }
-            if self.isMaxNumerOfCardsSelected() {
-                if self.checkForMatch() {
-                    self.setOnTable += self.selectedCards
-                    self.score += self.scorePoints
-                } else {
-                    self.score -= self.penaltyPoints
-                }
+                print("selectOrDeselect(card: Card): self.selectedCards.index(of: card) returned nil")
             }
         } else {
-            // choose card after evaluation
-            // TODO check that there are cards left in the Deck
-            if self.setOnTable.count == self.maxNumberOfSelectedCards {
-                // there is a match
-                self.matchedCards += self.selectedCards
-                self.replaceCardsInTheSet()
-                self.selectedCards.removeAll()
-                if !self.setOnTable.contains(chosenCard) {
-                    self.selectedCards.append(chosenCard)
-                }
-                self.setOnTable.removeAll()
+            self.selectedCards.append(card)
+        }
+    }
+    
+    mutating func evaluateSelectedCards() {
+        if self.isMaxNumerOfCardsSelected {
+            if self.checkForMatch() {
+                self.setOnTable += self.selectedCards
+                self.score += self.scorePoints
             } else {
-                // there is no match
-                self.selectedCards.removeAll()
-                self.selectedCards.append(chosenCard)
+                self.score -= self.penaltyPoints
             }
+        }
+    }
+    
+    mutating func handleSelectedCardsAfterTapOn(card: Card) {
+        if self.setOnTable.count == self.maxNumberOfSelectedCards {
+            self.matchedCards += self.selectedCards
+            self.replaceCardsInTheSet()
+            self.selectedCards.removeAll()
+            if !self.setOnTable.contains(card) {
+                self.selectedCards.append(card)
+            }
+            self.setOnTable.removeAll()
+        } else {
+            self.selectedCards.removeAll()
+            self.selectedCards.append(card)
         }
     }
     
@@ -120,23 +135,35 @@ struct GraphicalSetGame {
     }
     
     mutating func replaceCardsInTheSet() {
-        if self.deck.count > 2 && self.setOnTable.count == self.numberOfCardsInSet {
-            self.setOnTable.forEach { self.table[self.table.index(of: $0)!] = self.deck.remove(at: 0) } // высокая вероятность упасть здесь self.table[self.table.index(of: $0)!]
-        } else if self.deck.count == 0 {
-            self.setOnTable.forEach { self.table.remove(at: self.table.index(of: $0)!) }
+        if self.deck.count > self.maxNumberOfSelectedCards - 1
+            && self.setOnTable.count == self.numberOfCardsInSet {
+            self.setOnTable.forEach {
+                if let cardIndex = self.table.index(of: $0) {
+                    self.table[cardIndex] = self.deck.remove(at: 0)
+                } else {
+                    print("replaceCardsInTheSet(): self.table.index(of: $0) returned nil")
+                }
+            } //DONE: высокая вероятность упасть здесь self.table[self.table.index(of: $0)!]
+        } else if self.deck.isEmpty {
+            self.setOnTable.forEach {
+                if let cardIndex = self.table.index(of: $0) {
+                    self.table.remove(at: cardIndex)
+                } else {
+                    print("replaceCardsInTheSet(): self.table.index(of: $0) returned nil")
+                }
+            }
         }
     }
     
     mutating func addThreeCardsToTable() {
-        if self.deck.count > 2 {
-            for _ in 0..<3 {
+        if self.deck.count > self.maxNumberOfSelectedCards - 1 {
+            for _ in 0..<self.maxNumberOfSelectedCards {
                 self.table.append(self.deck.remove(at: 0))
             }
         }
     }
     
     mutating func deal3MoreCards() {
-        // replace cards in the set   /// коммент акутален ?
         if self.setOnTable.count == self.numberOfCardsInSet {
             self.replaceCardsInTheSet()
             self.selectedCards.removeAll()

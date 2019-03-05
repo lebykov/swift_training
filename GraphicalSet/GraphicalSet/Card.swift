@@ -33,7 +33,7 @@ class Card: Hashable {
     
     private static var identifierFactory = 0
     
-    private static func getUniqueIdentifier() -> Int { // нарушение первого принципа SOLID
+    private static func getUniqueIdentifier() -> Int { //HOW TO?: нарушение первого принципа SOLID
         Card.identifierFactory += 1
         return Card.identifierFactory
     }

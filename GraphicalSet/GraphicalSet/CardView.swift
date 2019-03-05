@@ -15,11 +15,6 @@ class CardView: UIView {
     var shading: Int = 3 { didSet { self.setNeedsDisplay() } }
     var color: Int = 1 { didSet { self.setNeedsDisplay() } }
     
-    private struct CardViewConstants {  // private между public-ами
-        static let paddingCoefficient: CGFloat = 0.05
-        static let shadingNumberOfLines: Int = 30
-    }
-    
     lazy var symbolRectSideLenght: CGFloat = [self.bounds.width, self.bounds.height / 3].min() ?? 0.0
     
     override init(frame: CGRect) {
@@ -32,15 +27,20 @@ class CardView: UIView {
         self.setupView()
     }
     
-    private func setupView() {
-        self.backgroundColor = UIColor.lightGray
-    }
-    
-    override func draw(_ rect: CGRect) {   // internal между private-ами
+    override func draw(_ rect: CGRect) {   //DONE: internal между private-ами
         for position in self.calculateSymbolsPositions() {
             let symbolPath = self.drawSymbol(in: position)
             self.setShading(for: symbolPath, in: position)
         }
+    }
+    
+    private struct CardViewConstants {  //DONE: private между public-ами
+        static let paddingCoefficient: CGFloat = 0.05
+        static let shadingNumberOfLines: Int = 30
+    }
+    
+    private func setupView() {
+        self.backgroundColor = UIColor.lightGray
     }
     
     private func drawDiamond(in rect: CGRect) -> UIBezierPath {
@@ -111,7 +111,7 @@ class CardView: UIView {
     
     private func drawSymbol(in rect: CGRect) -> UIBezierPath {
         switch self.symbol {
-        case 1: // не совсем понятно откуда такая зависимость между цифрами и фигурами
+        case 1: //HOWTO?: не совсем понятно откуда такая зависимость между цифрами и фигурами
             return self.drawSquiggle(in: rect)
         case 2:
             return self.drawOval(in: rect)
@@ -132,29 +132,36 @@ class CardView: UIView {
             self.getSymbolColor().setFill()
             symbol.fill()
         case 3:
-            if let context = UIGraphicsGetCurrentContext() { // лучше вынести в отдельную функцию
-                context.saveGState()
-                self.getSymbolColor().setStroke()
-                symbol.lineWidth = self.symbolRectSideLenght * 0.03
-                symbol.stroke()
-                symbol.addClip()
-                
-                let shadingPath = UIBezierPath()
-                let shadingDelta = symbolRectSideLenght.rounded(.down) / CGFloat(CardViewConstants.shadingNumberOfLines) // проверка на ноль
-                for lineNumber in 0..<CardViewConstants.shadingNumberOfLines {
-                    shadingPath.move(to: CGPoint(x: rect.origin.x,
-                                                 y: rect.origin.y + shadingDelta * CGFloat(lineNumber)))
-                    shadingPath.addLine(to: CGPoint(x: rect.origin.x + rect.size.width,
-                                                    y: rect.origin.y + shadingDelta * CGFloat(lineNumber)))
-                }
-                shadingPath.lineWidth = self.symbolRectSideLenght * 0.01
-                shadingPath.stroke()
-                context.restoreGState()
-            } else {
-                print("UIGraphicsGetCurrentContext() returned nil")
-            }
+            self.makeStrokeShading(for: symbol, in: rect)
         default:
             print("Unknown shading case")
+        }
+    }
+    
+    private func makeStrokeShading(for symbol: UIBezierPath, in rect: CGRect) {
+        if let context = UIGraphicsGetCurrentContext() { //DONE: лучше вынести в отдельную функцию
+            context.saveGState()
+            self.getSymbolColor().setStroke()
+            symbol.lineWidth = self.symbolRectSideLenght * 0.03
+            symbol.stroke()
+            symbol.addClip()
+            
+            let shadingPath = UIBezierPath()
+            var shadingDelta = CGFloat(1)
+            if !CGFloat(CardViewConstants.shadingNumberOfLines).isZero {
+                shadingDelta = symbolRectSideLenght.rounded(.down) / CGFloat(CardViewConstants.shadingNumberOfLines) // DONE: проверка на ноль
+            }
+            for lineNumber in 0..<CardViewConstants.shadingNumberOfLines {
+                shadingPath.move(to: CGPoint(x: rect.origin.x,
+                                             y: rect.origin.y + shadingDelta * CGFloat(lineNumber)))
+                shadingPath.addLine(to: CGPoint(x: rect.origin.x + rect.size.width,
+                                                y: rect.origin.y + shadingDelta * CGFloat(lineNumber)))
+            }
+            shadingPath.lineWidth = self.symbolRectSideLenght * 0.01
+            shadingPath.stroke()
+            context.restoreGState()
+        } else {
+            print("makeStrokeShading(for symbol: UIBezierPath, in rect: CGRect): UIGraphicsGetCurrentContext() returned nil")
         }
     }
     
