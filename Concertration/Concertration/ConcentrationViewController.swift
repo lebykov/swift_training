@@ -8,7 +8,7 @@
 
 import UIKit
 
-class ViewController: UIViewController {
+class ConcentrationViewController: UIViewController {
     
     private lazy var game: Concentration = Concentration(numberOfPairsOfCards: self.numberOfPairsOfCards) // lazy means that variable is not initialized until someone grabs it. lazy cannot have a didSet(observable)
     
@@ -27,10 +27,36 @@ class ViewController: UIViewController {
                                     "vehicles": ("🚗🚕🚙🚌🚎🏎🚓🚑🚛🚜", #colorLiteral(red: 0.3176470697, green: 0.07450980693, blue: 0.02745098062, alpha: 1), #colorLiteral(red: 0.5568627715, green: 0.3529411852, blue: 0.9686274529, alpha: 1)),
                                     "helloween": ("🦇😱🙀😈🎃👻🍭🍬🍎🕸", #colorLiteral(red: 0, green: 0, blue: 0, alpha: 1), #colorLiteral(red: 1, green: 0.5763723254, blue: 0, alpha: 1))]
     
-    private var theme: (emojis: String, backgroundColor: UIColor, cardBackColor: UIColor) = ("🦇😱🙀😈🎃👻🍭🍬🍎🕸", #colorLiteral(red: 0, green: 0, blue: 0, alpha: 1), #colorLiteral(red: 1, green: 0.5763723254, blue: 0, alpha: 1))
-    private lazy var emojiChoices = self.theme.emojis
+    var theme: (emojis: String, backgroundColor: UIColor, cardBackColor: UIColor)? = ("🦇😱🙀😈🎃👻🍭🍬🍎🕸", #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1), #colorLiteral(red: 0, green: 0.4784313725, blue: 1, alpha: 1)) {
+        didSet {
+            theme = theme ?? defaultTheme
+            emojiChoices = theme!.emojis
+            emoji = [:] // init of empty Dict
+            updateViewFromModel()
+            
+            self.updateBackgroundColor()
+            self.updateCardsBackColor()
+            self.updateNewGameButtonTextColor()
+            self.updateViewFromModel()
+            self.updateScoreLabel(to: self.game.score)
+            self.updateFlipCountLabel(to: self.game.flipCount)
+        }
+    }
+    
+    let defaultTheme = ("🦇😱🙀😈🎃👻🍭🍬🍎🕸", #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1), #colorLiteral(red: 0, green: 0.4784313725, blue: 1, alpha: 1))
+    
+    private lazy var emojiChoices = self.theme?.emojis
     ///---- Придерживаемся единого стиля
     private var emoji = [Card: String]() // initialization of Dictionary
+    
+    // demo code from lection 7
+//    var theme: String? {
+//        didSet {
+//            emojiChoices = theme. ?? ""
+//            emoji = [:] // init of empty Dict
+//            updateViewFromModel()
+//        }
+//    }
 
     ///---- Комментарии и документация к коду обычно пишется на русском, зачем лишний раз переводить и задумываться
     // almost always Outlets must be private
@@ -68,7 +94,7 @@ class ViewController: UIViewController {
         ///---- Обращение к свойствам текущего класса или вызов методов - через self, так сразу понятно что это относится НЕ к локальным переменным
         self.game = Concentration(numberOfPairsOfCards: self.numberOfPairsOfCards)
         self.theme = self.chooseRandomTheme()
-        self.emojiChoices = self.theme.emojis
+        self.emojiChoices = self.theme!.emojis
         self.updateBackgroundColor()
         self.updateCardsBackColor()
         self.updateNewGameButtonTextColor()
@@ -79,19 +105,19 @@ class ViewController: UIViewController {
     ///---- где то две строки пустых, а где то одна - не единообразно
     
     private func updateBackgroundColor() {
-        self.view.backgroundColor = self.theme.backgroundColor
+        self.view.backgroundColor = self.theme!.backgroundColor
     }
     
     private func updateCardsBackColor() {
         for button in self.cardButtons {
-            button.backgroundColor = self.theme.cardBackColor
+            button.backgroundColor = self.theme!.cardBackColor
         }
     }
     
     private func updateFlipCountLabel(to flipCount: Int) {
         let attributes: [NSAttributedStringKey: Any] = [
             .strokeWidth : 5.0,
-            .strokeColor : self.theme.cardBackColor
+            .strokeColor : self.theme!.cardBackColor
         ]
         let attributedString = NSAttributedString(string: "Flips: \(flipCount)", attributes: attributes)
         self.flipCountLable.attributedText = attributedString
@@ -100,7 +126,7 @@ class ViewController: UIViewController {
     private func updateScoreLabel(to newScore: Int) {            // Assignment 1. Adding score
         let attributes: [NSAttributedStringKey: Any] = [
             .strokeWidth : 5.0,
-            .strokeColor : self.theme.cardBackColor
+            .strokeColor : self.theme!.cardBackColor
         ]
         let attributedString = NSAttributedString(string: "Score: \(newScore)", attributes: attributes)
         self.scoreLabel.attributedText = attributedString
@@ -109,31 +135,33 @@ class ViewController: UIViewController {
     private func updateNewGameButtonTextColor() {
         let attributes: [NSAttributedStringKey: Any] = [
             .strokeWidth : 5.0,
-            .strokeColor : self.theme.cardBackColor
+            .strokeColor : self.theme!.cardBackColor
         ]
         let attributedString = NSAttributedString(string: "New Game", attributes: attributes)
         self.newGameButton.setAttributedTitle(attributedString, for: UIControlState.normal)
     }
     
     private func updateViewFromModel() {
-        for index in self.cardButtons.indices {
-            ///---- при обращению к массиву всегда нужно проверять на его границы
-            /// ^^^ как обрабатывать случай с индексом, выходящим за границы?
-            let button = self.cardButtons[index]
-            let card = self.game.cards[index]
-            
-            ///---- подумай как превратить эти 7 строчек снизу в 2 через тернарный оператор, это на ДЗ
-            ///^^^ получилось с ворнингом
-            card.isFaceUp ? (button.setTitle(self.emoji(for: card), for: .normal), button.backgroundColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1))
-                : (button.setTitle("", for: .normal), button.backgroundColor = card.isMatched ? #colorLiteral(red: 1, green: 0.5763723254, blue: 0, alpha: 0) : self.theme.cardBackColor)
+        if self.cardButtons != nil {
+            for index in self.cardButtons.indices {
+                ///---- при обращению к массиву всегда нужно проверять на его границы
+                /// ^^^ как обрабатывать случай с индексом, выходящим за границы?
+                let button = self.cardButtons[index]
+                let card = self.game.cards[index]
+                
+                ///---- подумай как превратить эти 7 строчек снизу в 2 через тернарный оператор, это на ДЗ
+                ///^^^ получилось с ворнингом
+                card.isFaceUp ? (button.setTitle(self.emoji(for: card), for: .normal), button.backgroundColor = #colorLiteral(red: 0.6666666865, green: 0.6666666865, blue: 0.6666666865, alpha: 1))
+                    : (button.setTitle("", for: .normal), button.backgroundColor = card.isMatched ? #colorLiteral(red: 1, green: 0.5763723254, blue: 0, alpha: 0) : self.theme!.cardBackColor)
 
+            }
         }
     }
     
     private func emoji(for card: Card) -> String {
-        if self.emoji[card] == nil, self.emojiChoices.count > 0 {
-            let randomStringIndex = self.emojiChoices.index(self.emojiChoices.startIndex, offsetBy: self.emojiChoices.count.arc4random)
-            self.emoji[card] = String(self.emojiChoices.remove(at: randomStringIndex)) // remove chosen emojies to get rid of duplication
+        if self.emoji[card] == nil, self.emojiChoices!.count > 0 {
+            let randomStringIndex = self.emojiChoices!.index(self.emojiChoices!.startIndex, offsetBy: self.emojiChoices!.count.arc4random)
+            self.emoji[card] = String(self.emojiChoices!.remove(at: randomStringIndex)) // remove chosen emojies to get rid of duplication
         }
         return emoji[card] ?? "?" // the same as commented out code
     }
@@ -144,7 +172,7 @@ class ViewController: UIViewController {
         if let randomThemeValue = self.themes[randomTheme] {
             return randomThemeValue
         } else {
-            return self.theme
+            return self.theme!
         }
     }
 }
